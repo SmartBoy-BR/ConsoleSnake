@@ -26,6 +26,8 @@ Game::Game()
     handle = GetStdHandle(STD_OUTPUT_HANDLE);
     cursorCoord = { 0, 0 };
     ccInfo = new CONSOLE_CURSOR_INFO();
+    consoleWindow = NULL;
+    windowLong = 0;
     srand((unsigned)time(0));
     TitleScreenBackColors = { 1,2,3,4,6,7,8,9,10,11,12,13,14,15,30,32,48,78,87,96,113,125,128,142,159,160,222,224,240 };
     numberLimit = static_cast<short>(TitleScreenBackColors.size());

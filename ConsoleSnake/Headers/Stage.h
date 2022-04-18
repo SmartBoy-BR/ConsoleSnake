@@ -1,10 +1,15 @@
 #pragma once
+#include "../Headers/Point.h"
 
 class Stage
 {
 	private:
-		void drawStageScreen();
-	
-	public:
 		Stage();
+		Point startPosition;
+		Point endPosition;
+		void drawStageScreen();
+
+	public:
+		Stage(Point startP, Point endP);
+		void run();
 };
