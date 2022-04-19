@@ -10,12 +10,15 @@ class Game;
 
 #include <vector>
 #include <Windows.h>
+#include "../Headers/Point.h"
 
 class TitleScreen
 {
 	private:
-		Game						*game;
+		Game*						ptrGame;
+		Point						playerChoiceArrow;
 		static bool					enableEnterMessage;
+		static Point				blinkMsgPosition;
 		static std::vector<short>   TitleScreenBackColors;
 		static short                numberLimit;
 		static short                lastRandom;
@@ -25,6 +28,8 @@ class TitleScreen
 		static void changeTitleScreenColors();
 
 	public:
-		TitleScreen(Game *refGame);
-		void run();
+		TitleScreen(Game* ptrGame);
+		~TitleScreen();
+		int prepareTitleScreen();
+		bool waitingForPlayerChoice();
 };

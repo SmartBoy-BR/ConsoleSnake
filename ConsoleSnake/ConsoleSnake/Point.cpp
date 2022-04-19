@@ -6,6 +6,16 @@
 
 #include "../Headers/Point.h"
 
+Point::Point()
+{
+	xCoordinate = yCoordinate = 0;
+}
+
+Point::Point(int xy)
+{
+	xCoordinate = yCoordinate = xy;
+}
+
 Point::Point(int x, int y)
 {
 	xCoordinate = x;
@@ -18,19 +28,20 @@ Point::Point(const Point& otherPoint)
 	yCoordinate = otherPoint.yCoordinate;
 }
 
-Point Point::operator*(const int& value)
-{
-	Point result {
-		this->xCoordinate * value,
-		this->yCoordinate * value
-	};
+int Point::X() { return xCoordinate; }
+int Point::Y() { return yCoordinate; }
 
-	return result;
+Point& Point::operator*(const int& value)
+{
+	this->xCoordinate *= value;
+	this->yCoordinate *= value;
+
+	return *this;
 }
 
 Point Point::operator*(const Point& otherPoint)
 {
-	Point result{
+	Point result = {
 		this->xCoordinate * otherPoint.xCoordinate,
 		this->yCoordinate * otherPoint.yCoordinate
 	};
@@ -40,7 +51,7 @@ Point Point::operator*(const Point& otherPoint)
 
 Point Point::operator+(const Point& otherPoint)
 {
-	Point result{
+	Point result = {
 		this->xCoordinate + otherPoint.xCoordinate,
 		this->yCoordinate + otherPoint.yCoordinate
 	};
@@ -50,7 +61,7 @@ Point Point::operator+(const Point& otherPoint)
 
 Point Point::operator-(const Point& otherPoint)
 {
-	Point result{
+	Point result = {
 		this->xCoordinate - otherPoint.xCoordinate,
 		this->yCoordinate - otherPoint.yCoordinate
 	};
@@ -58,14 +69,16 @@ Point Point::operator-(const Point& otherPoint)
 	return result;
 }
 
-Point Point::operator+=(const Point& otherPoint)
+Point& Point::operator+=(const Point& otherPoint)
 {
-	return operator+(otherPoint);
+	*this = operator+(otherPoint);
+	return *this;
 }
 
-Point Point::operator-=(const Point& otherPoint)
+Point& Point::operator-=(const Point& otherPoint)
 {
-	return operator-(otherPoint);
+	*this = operator-(otherPoint);
+	return *this;
 }
 
 

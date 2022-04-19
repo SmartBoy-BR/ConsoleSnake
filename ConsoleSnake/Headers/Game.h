@@ -9,6 +9,8 @@
 #include <vector>
 #include <Windows.h>
 #include "../Headers/TitleScreen.h"
+#include "../Headers/Stage.h"
+#include "../Headers/Point.h"
 
 enum class ConsoleColor { Black, Blue, Green, Aqua, Red, Purple, Yellow, White, Gray, LightBlue, LightGreen, LightAqua, LightRed, LightPurple, LightYellow, BrightWhite };
 
@@ -18,32 +20,43 @@ enum class KeyValues {
     SpecialKey1 = 0x00,
     SpecialKey2 = 0xE0,
     Enter       = 0x0D,
-    Up          = 0x48,
-    Left        = 0x4B,
-    Right       = 0x4D,
-    Down        = 0x50
+    ArrowUp     = 0x48, // After a special key.
+    ArrowLeft   = 0x4B, // After a special key.
+    ArrowRight  = 0x4D, // After a special key.
+    ArrowDown   = 0x50  // After a special key.
 };
+
+#define CONSOLEWIDTH    113
+#define CONSOLEHEIGHT   33
+
+#define ERROR       -1
+#define SUCCESS     0
+#define BACKTOSTART 1
 
 class Game
 {
     private:
-        TitleScreen                 *titleScreen;
-        GameStates                  gameStates;
-        static HANDLE               handle;
-        static COORD                cursorCoord;
-        CONSOLE_CURSOR_INFO         *ccInfo;
-        HWND                        consoleWindow;
-        long                        windowLong;
+        TitleScreen*            ptrTitleScreen;
+        Stage*                  ptrStage;
+        GameStates              gameStates;
+        static HANDLE           handle;
+        static COORD            cursorCoord;
+        CONSOLE_CURSOR_INFO     *ccInfo;
+        HWND                    consoleWindow;
+        long                    windowLong;
 
         void setupConsoleWindow();
         void prepareToCloseWindow();
-        bool performTittleScreen();
-        void setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor);
 
     public:
+        const Point StartScreenPoint;
+        const Point EndScreenPoint;
+
         Game();
         ~Game();
-        void run();
+        int run();
         static void setCursorPosition(short x, short y);
+        static void setCursorPosition(Point &cursorCoordinate);
+        void setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor);
         void testColors();
 };

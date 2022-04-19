@@ -14,14 +14,18 @@ class Point
 		int yCoordinate;
 
 	public:
+		Point();
+		Point(int xy);
 		Point(int x, int y);
 		Point(const Point& otherPoint);
-		Point operator*(const int& value);
+		int X();
+		int Y();
+		Point& operator*(const int& value);
 		Point operator*(const Point& otherPoint);
 		Point operator+(const Point& otherPoint);
 		Point operator-(const Point& otherPoint);
-		Point operator+=(const Point& otherPoint);
-		Point operator-=(const Point& otherPoint);
+		Point& operator+=(const Point& otherPoint);
+		Point& operator-=(const Point& otherPoint);
 		bool operator==(const Point& otherPoint);
 		bool operator!=(const Point& otherPoint);
 		long sqrDistance(const Point& otherPoint);

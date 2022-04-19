@@ -5,17 +5,23 @@
  */
 
 #pragma once
+
+class Game;
+
 #include "../Headers/Point.h"
+
+enum class PlayStates { Playing, GameOver, BackToStart };
 
 class Stage
 {
 	private:
-		Stage();
-		Point startPosition;
-		Point endPosition;
+		Game*		ptrGame;
+
 		void drawStageScreen();
+		//static void blinkGetReadyMsg();
 
 	public:
-		Stage(Point startP, Point endP);
-		void run();
+		Stage(Game* ptrGame);
+		~Stage();
+		int run();
 };

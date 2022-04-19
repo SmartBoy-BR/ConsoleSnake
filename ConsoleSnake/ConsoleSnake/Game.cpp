@@ -4,7 +4,6 @@
  * FUNCTION: Source file with the game's global implementations and definitions.
  */
 
-#include <conio.h>
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -19,8 +18,9 @@ HANDLE Game::handle;
 COORD Game::cursorCoord;
 
 Game::Game()
+    :StartScreenPoint(2, 1), EndScreenPoint(CONSOLEWIDTH, CONSOLEHEIGHT - 1)
 {
-    titleScreen = new TitleScreen(this);
+    ptrTitleScreen = new TitleScreen(this);
     gameStates = GameStates::TitleScreen;
     handle = GetStdHandle(STD_OUTPUT_HANDLE);
     cursorCoord = { 0, 0 };
@@ -32,12 +32,18 @@ Game::Game()
 
 Game::~Game()
 {
-    delete titleScreen;
-    titleScreen = NULL;
+    delete ptrTitleScreen;
+    ptrTitleScreen = NULL;
 }
 
-void Game::run()
+int Game::run()
 {
+    if (ptrTitleScreen == NULL)
+    {
+        cout << "Não foi possível criar \"ptrTitleScreen\"." << endl;
+        return ERROR;
+    }
+
     setupConsoleWindow();
     bool runningGame = true;
 
@@ -46,22 +52,41 @@ void Game::run()
         switch (gameStates)
         {
             case GameStates::TitleScreen:
-                //drawTitleScreen();
-                titleScreen->run();
-                //gameStates = GameStates::WaitOption;
-                gameStates = GameStates::Quit;
+                gameStates = (ptrTitleScreen->prepareTitleScreen() == SUCCESS)
+                    ? GameStates::WaitOption
+                    : GameStates::Quit;
                 break;
 
             case GameStates::WaitOption:
                 gameStates = GameStates::Quit;
 
-                if (performTittleScreen())
+                if (ptrTitleScreen->waitingForPlayerChoice())
                 {
+                    ptrStage = new Stage(this);
+
+                    if (ptrStage == NULL)
+                    {
+                        cout << "Não foi possível criar \"ptrStage\"." << endl;
+                        return ERROR;
+                    }
+
                     gameStates = GameStates::GamePlay;
                 }
                 break;
 
             case GameStates::GamePlay:
+                switch (ptrStage->run())
+                {
+                    case ERROR:
+                        return ERROR;
+
+                    default:
+                    case BACKTOSTART:
+                        delete ptrStage;
+                        ptrStage = NULL;
+                        gameStates = GameStates::TitleScreen;
+                        break;
+                }
                 break;
 
             case GameStates::Quit:
@@ -73,7 +98,31 @@ void Game::run()
                 break;
         }
     }
+
     prepareToCloseWindow();
+    return SUCCESS;
+}
+
+void Game::setCursorPosition(short x, short y)
+{
+    cursorCoord.X = x;
+    cursorCoord.Y = y;
+    SetConsoleCursorPosition(handle, cursorCoord);
+}
+
+void Game::setCursorPosition(Point &cursorCoordinate)
+{
+    cursorCoord.X = cursorCoordinate.X();
+    cursorCoord.Y = cursorCoordinate.Y();
+    SetConsoleCursorPosition(handle, cursorCoord);
+}
+
+void Game::setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor)
+{
+    short backColor = static_cast<short>(backgroundColor);
+    short textColor = static_cast<short>(foregroundColor);
+
+    SetConsoleTextAttribute(handle, (backColor << 4) | textColor);
 }
 
 void Game::setupConsoleWindow()
@@ -90,13 +139,13 @@ void Game::setupConsoleWindow()
     SMALL_RECT smallRect;
     COORD consoleSize;
 
-    consoleSize.X = 113;
-    consoleSize.Y = 33;
+    consoleSize.X = CONSOLEWIDTH;
+    consoleSize.Y = CONSOLEHEIGHT;
 
     smallRect.Top = smallRect.Left = 0;
     smallRect.Right = consoleSize.X - 1;
     smallRect.Bottom = consoleSize.Y - 1;
-    
+
     SetConsoleWindowInfo(handle, true, &smallRect);
     SetConsoleScreenBufferSize(handle, consoleSize);
 
@@ -113,78 +162,6 @@ void Game::prepareToCloseWindow()
 
     system("Color 7");
     system("cls");
-}
-
-void Game::setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor)
-{
-    short backColor = static_cast<short>(backgroundColor);
-    short textColor = static_cast<short>(foregroundColor);
-
-    SetConsoleTextAttribute(handle, (backColor << 4) | textColor);
-}
-
-void Game::setCursorPosition(short x, short y)
-{
-    cursorCoord.X = x;
-    cursorCoord.Y = y;
-    SetConsoleCursorPosition(handle, cursorCoord);
-}
-
-bool Game::performTittleScreen()
-{
-    short yPos = 23;
-    short key = 0;
-    bool startGameplay = false;
-
-    do
-    {
-        Timer::run();
-
-        if (_kbhit())
-        {
-            key = _getch();
-            setCursorPosition(46, 20);
-            cout << std::dec << key << " ";
-
-            if (key == static_cast<short>(KeyValues::SpecialKey1) ||
-                key == static_cast<short>(KeyValues::SpecialKey2))
-            {
-                key = _getch();
-                cout << std::dec << key;
-
-                setCursorPosition(52, yPos);
-                cout << "  ";
-
-                switch (static_cast<KeyValues>(key))
-                {
-                    case KeyValues::Up:
-                        yPos = 23;
-                        startGameplay = true;
-                        break;
-                    
-                    //case KeyValues::Left:
-                    //    break;
-                    
-                    //case KeyValues::Right:
-                    //    break;
-                    
-                    case KeyValues::Down:
-                        yPos = 24;
-                        startGameplay = false;
-                        break;
-                    
-                    default:
-                        break;
-                }
-
-                setCursorPosition(52, yPos);
-                cout << ">>";
-            }
-        }
-
-    } while (key != static_cast<short>(KeyValues::Enter));
-
-    return startGameplay;
 }
 
 void Game::testColors()

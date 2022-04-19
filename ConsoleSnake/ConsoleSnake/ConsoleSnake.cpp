@@ -11,9 +11,10 @@ using namespace std;
 
 int main()
 {
+    int ret = 0;
     Game consoleSnake;
     //consoleSnake.testColors();
-    consoleSnake.run();
+    ret = consoleSnake.run();
 
-    return 0;
+    return ret;
 }
