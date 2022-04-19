@@ -1,9 +1,10 @@
-//#include <cstdlib> 
-//#include <ctime>
+/* CREATED BY:      SmartBoyBR (A. Rodrigo Moreira)
+ * CREATED DATE:    2022-Apr-16
+ *
+ * FUNCTION: Timer source file with the implementations that establish the control of the game's time bases.
+ */
+
 #include <iostream>
-//#include <iomanip>
-//#include <sstream>
-//#include <string>
 #include <tuple>
 #include "../Headers/Timer.h"
 

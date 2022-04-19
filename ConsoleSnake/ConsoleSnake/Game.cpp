@@ -1,10 +1,12 @@
-﻿//#include <chrono>
-#include <conio.h> 
-//#include <cstdlib> 
-//#include <ctime>
+﻿/* CREATED BY:      SmartBoyBR (A. Rodrigo Moreira)
+ * CREATED DATE:    2022-Apr-10
+ *
+ * FUNCTION: Source file with the game's global implementations and definitions.
+ */
+
+#include <conio.h>
 #include <iostream>
 #include <iomanip>
-//#include <sstream>
 #include <string>
 #include "../Headers/Game.h"
 #include "../Headers/Timer.h"
@@ -13,15 +15,12 @@ using std::cout;
 using std::endl;
 using std::string;
 
-std::vector<short> Game::TitleScreenBackColors;
-short Game::numberLimit = 0;
-short Game::lastRandom = 0;
-bool Game::enableEnterMessage;
 HANDLE Game::handle;
 COORD Game::cursorCoord;
 
 Game::Game()
 {
+    titleScreen = new TitleScreen(this);
     gameStates = GameStates::TitleScreen;
     handle = GetStdHandle(STD_OUTPUT_HANDLE);
     cursorCoord = { 0, 0 };
@@ -29,10 +28,12 @@ Game::Game()
     consoleWindow = NULL;
     windowLong = 0;
     srand((unsigned)time(0));
-    TitleScreenBackColors = { 1,2,3,4,6,7,8,9,10,11,12,13,14,15,30,32,48,78,87,96,113,125,128,142,159,160,222,224,240 };
-    numberLimit = static_cast<short>(TitleScreenBackColors.size());
-    enableEnterMessage = false;
-    lastRandom = 5; // Default color = 7.
+}
+
+Game::~Game()
+{
+    delete titleScreen;
+    titleScreen = NULL;
 }
 
 void Game::run()
@@ -45,8 +46,10 @@ void Game::run()
         switch (gameStates)
         {
             case GameStates::TitleScreen:
-                drawTitleScreen();
-                gameStates = GameStates::WaitOption;
+                //drawTitleScreen();
+                titleScreen->run();
+                //gameStates = GameStates::WaitOption;
+                gameStates = GameStates::Quit;
                 break;
 
             case GameStates::WaitOption:
@@ -55,8 +58,6 @@ void Game::run()
                 if (performTittleScreen())
                 {
                     gameStates = GameStates::GamePlay;
-                    Timer::deleteTimer(&Game::blinkPressEnterMsg);
-                    Timer::deleteTimer(&Game::changeTitleScreenColors);
                 }
                 break;
 
@@ -64,8 +65,6 @@ void Game::run()
                 break;
 
             case GameStates::Quit:
-                Timer::deleteTimer(&Game::blinkPressEnterMsg);
-                Timer::deleteTimer(&Game::changeTitleScreenColors);
                 runningGame = false;
                 break;
 
@@ -186,96 +185,6 @@ bool Game::performTittleScreen()
     } while (key != static_cast<short>(KeyValues::Enter));
 
     return startGameplay;
-}
-
-void Game::drawTitleScreen()
-{
-    const short StartXpos = 2;
-    const short StartYpos = 1;
-    const short LastXpos = 114;
-
-    const string SnakeText[] = {
-        " SSSSSS  NN   NN    AAA    KK   KK  EEEEEEE ",
-        "SS       NN   NN   AA AA   KK  KK   EE      ",
-        "SS       NNN  NN  AA   AA  KK KK    EE      ",
-        " SSSSS   NN N NN  AAAAAAA  KKK      EEEEEE  ",
-        "     SS  NN  NNN  AA   AA  KK KK    EE      ",
-        "     SS  NN   NN  AA   AA  KK  KK   EE      ",
-        "SSSSSS   NN   NN  AA   AA  KK   KK  EEEEEEE®"};
-
-    system("cls");
-    
-    setCursorPosition(StartXpos, StartYpos);
-    cout << '+' << std::right << std::setfill('-') << std::setw(LastXpos - StartXpos - 2) << '+' << endl;
-
-    short yPos;
-    for (yPos = StartYpos + 1; yPos <= 30 + StartYpos; yPos++)
-    {
-        setCursorPosition(StartXpos, yPos);
-        cout << '|';
-        setCursorPosition(LastXpos - 2, yPos);
-        cout << '|' << endl;;
-    }
-
-    short snakeTxtYpos = 8 + StartYpos;
-    short snakeTxtXpos = static_cast<short>((LastXpos + StartXpos - SnakeText[0].length()) * 0.5f);
-    short snakeTxtLineLength = sizeof(SnakeText) / sizeof(SnakeText[0]);
-
-    setCursorPosition(snakeTxtXpos, snakeTxtYpos - 1);
-    cout << "Console";
-
-    for (short i = 0; i < snakeTxtLineLength; i++)
-    {
-        setCursorPosition(snakeTxtXpos, snakeTxtYpos + i);
-        cout << SnakeText[i];
-    }
-
-    cout << std::setfill(' ');
-    setCursorPosition(snakeTxtXpos + 17, yPos - 9);
-    cout << std::right << std::setw(5) << "Ini" << std::left << std::setw(5) << "cia";
-    setCursorPosition(snakeTxtXpos + 17, yPos - 8);
-    cout << std::right << std::setw(5) << "Sa" << std::left << std::setw(5) << "ir";
-    setCursorPosition(52, yPos - 9);
-    cout << ">>";
-
-    string companyString = "© SMARTBOYBR CO..LTD.  2022";
-    setCursorPosition(static_cast<short>((LastXpos + StartXpos - companyString.length()) * 0.5f), yPos - 1);
-    cout << companyString;
-
-    setCursorPosition(StartXpos, yPos);
-    cout << '+' << std::right << std::setfill('-') << std::setw(LastXpos - StartXpos - 2) << '+';
-
-    Timer::setTimerAndCallback(125, &Game::blinkPressEnterMsg);
-    Timer::setTimerAndCallback(2000, &Game::changeTitleScreenColors);
-}
-
-void Game::blinkPressEnterMsg()
-{
-    enableEnterMessage = !enableEnterMessage;
-    setCursorPosition(52, 21);
-
-    if (enableEnterMessage)
-        cout << "Tecle Enter";
-    else
-        cout << "           ";
-}
-
-void Game::changeTitleScreenColors()
-{
-    short randomNumber;
-
-    do
-    {
-        randomNumber = (rand() % numberLimit);
-    } while (lastRandom == randomNumber);
-
-    lastRandom = randomNumber;
-
-    char colorCmd[10];
-    sprintf_s(colorCmd, "Color %x", TitleScreenBackColors[randomNumber]);
-
-    system(colorCmd);
-    system(colorCmd);
 }
 
 void Game::testColors()

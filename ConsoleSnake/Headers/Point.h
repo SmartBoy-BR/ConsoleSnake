@@ -1,3 +1,10 @@
+/* CREATED BY:      SmartBoyBR (A. Rodrigo Moreira)
+ * CREATED DATE:    2022-Apr-17
+ *
+ * FUNCTION: Header of the "Point" object with definitions of the various possible mathematical
+ *		operations involving one or more points in the console screen's coordinate system.
+ */
+
 #pragma once
 
 class Point

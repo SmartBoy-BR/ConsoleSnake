@@ -1,3 +1,9 @@
+/* CREATED BY:      SmartBoyBR (A. Rodrigo Moreira)
+ * CREATED DATE:    2022-Apr-17
+ *
+ * FUNCTION: Source file of the "Point" object with the implementations of operator overloads and auxiliary functions.
+ */
+
 #include "../Headers/Point.h"
 
 Point::Point(int x, int y)

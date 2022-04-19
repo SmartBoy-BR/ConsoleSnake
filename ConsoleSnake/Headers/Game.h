@@ -1,7 +1,14 @@
+/* CREATED BY:      SmartBoyBR (A. Rodrigo Moreira)
+ * CREATED DATE:    2022-Apr-10
+ *
+ * FUNCTION: Game header with settings that are not particular to other elements.
+ */
+
 #pragma once
 
 #include <vector>
 #include <Windows.h>
+#include "../Headers/TitleScreen.h"
 
 enum class ConsoleColor { Black, Blue, Green, Aqua, Red, Purple, Yellow, White, Gray, LightBlue, LightGreen, LightAqua, LightRed, LightPurple, LightYellow, BrightWhite };
 
@@ -20,27 +27,23 @@ enum class KeyValues {
 class Game
 {
     private:
-        GameStates gameStates;
-        static std::vector<short> TitleScreenBackColors;
-        static short numberLimit;
-        static short lastRandom;
-        static bool enableEnterMessage;
-        static HANDLE handle;
-        static COORD cursorCoord;
-        CONSOLE_CURSOR_INFO* ccInfo;
-        HWND consoleWindow;
-        long windowLong;
+        TitleScreen                 *titleScreen;
+        GameStates                  gameStates;
+        static HANDLE               handle;
+        static COORD                cursorCoord;
+        CONSOLE_CURSOR_INFO         *ccInfo;
+        HWND                        consoleWindow;
+        long                        windowLong;
+
         void setupConsoleWindow();
         void prepareToCloseWindow();
-        void drawTitleScreen();
-        static void blinkPressEnterMsg();
-        static void changeTitleScreenColors();
         bool performTittleScreen();
         void setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor);
-        static void setCursorPosition(short x, short y);
 
     public:
         Game();
+        ~Game();
         void run();
+        static void setCursorPosition(short x, short y);
         void testColors();
 };
