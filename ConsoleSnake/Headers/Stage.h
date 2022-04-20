@@ -6,22 +6,22 @@
 
 #pragma once
 
-class Game;
-
 #include "../Headers/Point.h"
+#include "../Headers/UI.h"
 
 enum class PlayStates { Playing, GameOver, BackToStart };
 
 class Stage
 {
 	private:
-		Game*		ptrGame;
+		UI			ui;
+		PlayStates	playStates;
 
 		void drawStageScreen();
 		//static void blinkGetReadyMsg();
 
 	public:
-		Stage(Game* ptrGame);
+		Stage();
 		~Stage();
 		int run();
 };

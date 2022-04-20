@@ -31,12 +31,14 @@ Point::Point(const Point& otherPoint)
 int Point::X() { return xCoordinate; }
 int Point::Y() { return yCoordinate; }
 
-Point& Point::operator*(const int& value)
+Point Point::operator*(const int& value)
 {
-	this->xCoordinate *= value;
-	this->yCoordinate *= value;
+	Point result = {
+		this->xCoordinate * value,
+		this->yCoordinate * value
+	};
 
-	return *this;
+	return result;
 }
 
 Point Point::operator*(const Point& otherPoint)

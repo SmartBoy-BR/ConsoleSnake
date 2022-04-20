@@ -21,11 +21,11 @@ std::vector<short> TitleScreen::TitleScreenBackColors;
 short TitleScreen::numberLimit = 0;
 short TitleScreen::lastRandom = 0;
 
-TitleScreen::TitleScreen(Game* ptrGame)
-    : ptrGame(ptrGame), playerChoiceArrow(51, 23)
+TitleScreen::TitleScreen()
+    : playerChoiceArrow(52, 23)
 {
     enableEnterMessage = false;
-    blinkMsgPosition = { 51, 21 };
+    blinkMsgPosition = { 52, 21 };
     TitleScreenBackColors = { 1,2,3,4,6,7,8,9,10,11,12,13,14,15,30,32,48,78,87,96,113,125,128,142,159,160,222,224,240 };
     numberLimit = static_cast<short>(TitleScreenBackColors.size());
     lastRandom = 5; // Default color = 7.
@@ -33,17 +33,10 @@ TitleScreen::TitleScreen(Game* ptrGame)
 
 TitleScreen::~TitleScreen()
 {
-    ptrGame = NULL;
 }
 
 int TitleScreen::prepareTitleScreen()
 {
-    if (ptrGame == NULL)
-    {
-        cout << "Não foi possível preparar a titleScreen por falta da referência \"game\"." << endl;
-        return ERROR;
-    }
-
     drawTitleScreen();
     Timer::setTimerAndCallback(125, &TitleScreen::blinkPressEnterMsg);
     Timer::setTimerAndCallback(2000, &TitleScreen::changeTitleScreenColors);
@@ -55,7 +48,7 @@ bool TitleScreen::waitingForPlayerChoice()
 {
     short yPos = playerChoiceArrow.Y();
     short key = 0;
-    bool startGameplay = false;
+    bool startGameplay = true;
 
     do
     {
@@ -65,7 +58,7 @@ bool TitleScreen::waitingForPlayerChoice()
         {
             key = _getch();
             //Game::setCursorPosition(46, 20);
-            //game->setTextColors(ConsoleColor::Gray, ConsoleColor::Black);
+            //Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Black);
             //cout << std::dec << key << " ";
 
             if (key == static_cast<short>(KeyValues::SpecialKey1) ||
@@ -125,24 +118,24 @@ void TitleScreen::drawTitleScreen()
 {
     system("cls");
 
-    Point currentDrawPoint(ptrGame->StartScreenPoint);
-    Point endDrawPoint(ptrGame->EndScreenPoint);
+    Point currentDrawPoint(Game::StartScreenPoint); //3,1
+    Point endDrawPoint(Game::EndScreenPoint); //111,32
 
     // DRAW THE BORDERS
-    Game::setCursorPosition(currentDrawPoint); // 2,1
-    short setW = endDrawPoint.X() - currentDrawPoint.X() - 2; // "-2" for both plus signs.
-    cout << '+' << std::right << std::setfill('-') << std::setw(setW) << '+' << endl;
+    Game::setCursorPosition(currentDrawPoint); // 3,1
+    short setW = endDrawPoint.X() - currentDrawPoint.X();
+    cout << '+' << std::right << std::setfill('-') << std::setw(setW) << "+" << endl;
 
     for (short yPos = currentDrawPoint.Y() + 1; yPos < endDrawPoint.Y(); yPos++)
     {
         Game::setCursorPosition(currentDrawPoint.X(), yPos);
         cout << '|';
-        Game::setCursorPosition(endDrawPoint.X() - 2, yPos);
-        cout << '|' << endl;;
+        Game::setCursorPosition(endDrawPoint.X(), yPos);
+        cout << "| " << endl;
     }
 
-    Game::setCursorPosition(currentDrawPoint.X(), endDrawPoint.Y()); //2,32
-    cout << '+' << std::right << std::setfill('-') << std::setw(setW) << '+';
+    Game::setCursorPosition(currentDrawPoint.X(), endDrawPoint.Y()); //3,32
+    cout << '+' << std::right << std::setfill('-') << std::setw(setW) << "+";
     
     // DRAW GAME TITLE
     const short consoleStringYpos = 8;
@@ -156,10 +149,10 @@ void TitleScreen::drawTitleScreen()
         "SSSSSS   NN   NN  AA   AA  KK   KK  EEEEEEE®" };
 
     short snakeTxtLineLength = sizeof(SnakeText) / sizeof(SnakeText[0]);
-    endDrawPoint += {currentDrawPoint.X(), 0}; // Add start "x" for next calculations.
+    endDrawPoint += {currentDrawPoint.X() + 2, 0}; // Add start "x" and 2 final white spaces for next calculations.
     currentDrawPoint = { static_cast<short>((endDrawPoint.X() - SnakeText[0].length()) * 0.5f), consoleStringYpos };
 
-    Game::setCursorPosition(currentDrawPoint); //35,8
+    Game::setCursorPosition(currentDrawPoint); //36,8
     cout << "Console";
 
     for (short i = 0; i < snakeTxtLineLength; i++)
@@ -170,19 +163,19 @@ void TitleScreen::drawTitleScreen()
     }
     
     // DRAW PLAYER OPTIONS
-    Game::setCursorPosition(playerChoiceArrow);//51,23
+    Game::setCursorPosition(playerChoiceArrow);//52,23
     cout << ">>";
     currentDrawPoint += {19, 8};
-    Game::setCursorPosition(currentDrawPoint);//54,23
+    Game::setCursorPosition(currentDrawPoint);//55,23
     cout << "Inicia";
     currentDrawPoint += {1, 1};
-    Game::setCursorPosition(currentDrawPoint);//55,24
+    Game::setCursorPosition(currentDrawPoint);//56,24
     cout << "Sair";
 
     // DRAW CMOPANY INFO
-    string companyString = "© SMARTBOYBR CO..LTD.  2022";
+    string companyString = "© SMARTBOYBR CO., LTD. 2022 ALL RIGHTS RESERVED.";
     currentDrawPoint = { static_cast<short>((endDrawPoint.X() - companyString.length()) * 0.5f), endDrawPoint.Y() - 1};
-    Game::setCursorPosition(currentDrawPoint);//(113+2-27)*0.5,32-1 => 44,31
+    Game::setCursorPosition(currentDrawPoint);//(116-48)*0.5,32-1 => 34,31
     cout << companyString;
 }
 

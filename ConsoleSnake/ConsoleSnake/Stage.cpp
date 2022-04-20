@@ -15,31 +15,52 @@ using std::cout;
 using std::endl;
 using std::string;
 
-Stage::Stage(Game* ptrGame)
-	: ptrGame(ptrGame)
+Stage::Stage()
 {
+	playStates = PlayStates::Playing;
 }
 
 Stage::~Stage()
 {
-	ptrGame = NULL;
 }
 
 int Stage::run()
 {
-	if (ptrGame == NULL)
-	{
-		cout << "Não foi possível preparar a stageScreen por falta da referência \"game\"." << endl;
-		return ERROR;
-	}
-
 	drawStageScreen();
+	ui.setupUI();
 
 	return BACKTOSTART;
 }
 
 void Stage::drawStageScreen()
 {
-	cout << "Back to start in 1.5 secs..." << endl;
-	Sleep(1500);
+	Point currentDrawPoint(Game::StartScreenPoint); //3,1
+	Point endDrawPoint(Game::EndScreenPoint); //111,32
+
+	// ADJUST TO CENTER COORDINATES
+	currentDrawPoint += {6, 1};
+	endDrawPoint -= {6, 3};
+
+	// DRAW THE STAGE BOUNDARIES
+	Game::setCursorPosition(currentDrawPoint); //9,2
+	cout << "CONSOLE SNAKE v1.0";
+	currentDrawPoint += {0, 1};
+	Game::setCursorPosition(currentDrawPoint); // 9,3
+	short setW = endDrawPoint.X() - currentDrawPoint.X();
+	cout << '+' << std::setfill('-') << std::setw(setW) << '+' << endl;
+
+	currentDrawPoint += {0, 1}; // 9,4
+
+	while (currentDrawPoint.Y() < endDrawPoint.Y())
+	{
+		Game::setCursorPosition(currentDrawPoint);
+		cout << '|' << std::right << std::setfill(' ') << std::setw(setW) << '|' << endl;
+		currentDrawPoint += {0, 1};
+	}
+
+	Game::setCursorPosition(currentDrawPoint); // 9,29
+	cout << '+' << std::setfill('-') << std::setw(setW) << '+' << endl;
+
+	Sleep(3000);
+
 }

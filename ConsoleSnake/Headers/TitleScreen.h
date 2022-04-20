@@ -6,16 +6,12 @@
 
 #pragma once
 
-class Game;
-
 #include <vector>
-#include <Windows.h>
 #include "../Headers/Point.h"
 
 class TitleScreen
 {
 	private:
-		Game*						ptrGame;
 		Point						playerChoiceArrow;
 		static bool					enableEnterMessage;
 		static Point				blinkMsgPosition;
@@ -28,7 +24,7 @@ class TitleScreen
 		static void changeTitleScreenColors();
 
 	public:
-		TitleScreen(Game* ptrGame);
+		TitleScreen();
 		~TitleScreen();
 		int prepareTitleScreen();
 		bool waitingForPlayerChoice();

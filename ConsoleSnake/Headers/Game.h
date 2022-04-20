@@ -26,17 +26,17 @@ enum class KeyValues {
     ArrowDown   = 0x50  // After a special key.
 };
 
-#define CONSOLEWIDTH    113
+#define CONSOLEWIDTH    114
 #define CONSOLEHEIGHT   33
 
-#define ERROR       -1
+#define GAMEERROR       -1
 #define SUCCESS     0
 #define BACKTOSTART 1
 
 class Game
 {
     private:
-        TitleScreen*            ptrTitleScreen;
+        TitleScreen             ptrTitleScreen;
         Stage*                  ptrStage;
         GameStates              gameStates;
         static HANDLE           handle;
@@ -49,14 +49,15 @@ class Game
         void prepareToCloseWindow();
 
     public:
-        const Point StartScreenPoint;
-        const Point EndScreenPoint;
+        static unsigned short	lastHiScorePoints;
+        static const Point      StartScreenPoint;
+        static const Point      EndScreenPoint;
 
         Game();
         ~Game();
         int run();
         static void setCursorPosition(short x, short y);
-        static void setCursorPosition(Point &cursorCoordinate);
-        void setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor);
+        static void setCursorPosition(Point& cursorCoordinate);
+        static void setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor);
         void testColors();
 };

@@ -20,7 +20,7 @@ class Point
 		Point(const Point& otherPoint);
 		int X();
 		int Y();
-		Point& operator*(const int& value);
+		Point operator*(const int& value);
 		Point operator*(const Point& otherPoint);
 		Point operator+(const Point& otherPoint);
 		Point operator-(const Point& otherPoint);

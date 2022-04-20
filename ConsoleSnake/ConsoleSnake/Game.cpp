@@ -16,14 +16,20 @@ using std::string;
 
 HANDLE Game::handle;
 COORD Game::cursorCoord;
+unsigned short Game::lastHiScorePoints;
+const Point Game::StartScreenPoint = { 3, 1 };
+const Point Game::EndScreenPoint = {
+    CONSOLEWIDTH - 3, // Minus 1 console border and 2 final white spaces
+    CONSOLEHEIGHT - 1 // Minus 1 console border
+};
 
 Game::Game()
-    :StartScreenPoint(2, 1), EndScreenPoint(CONSOLEWIDTH, CONSOLEHEIGHT - 1)
 {
-    ptrTitleScreen = new TitleScreen(this);
+    ptrStage = NULL;
     gameStates = GameStates::TitleScreen;
     handle = GetStdHandle(STD_OUTPUT_HANDLE);
     cursorCoord = { 0, 0 };
+    lastHiScorePoints = 1250;
     ccInfo = new CONSOLE_CURSOR_INFO();
     consoleWindow = NULL;
     windowLong = 0;
@@ -32,18 +38,12 @@ Game::Game()
 
 Game::~Game()
 {
-    delete ptrTitleScreen;
-    ptrTitleScreen = NULL;
+    delete ptrStage;
+    ptrStage = NULL;
 }
 
 int Game::run()
 {
-    if (ptrTitleScreen == NULL)
-    {
-        cout << "Não foi possível criar \"ptrTitleScreen\"." << endl;
-        return ERROR;
-    }
-
     setupConsoleWindow();
     bool runningGame = true;
 
@@ -52,7 +52,7 @@ int Game::run()
         switch (gameStates)
         {
             case GameStates::TitleScreen:
-                gameStates = (ptrTitleScreen->prepareTitleScreen() == SUCCESS)
+                gameStates = (ptrTitleScreen.prepareTitleScreen() == SUCCESS)
                     ? GameStates::WaitOption
                     : GameStates::Quit;
                 break;
@@ -60,14 +60,14 @@ int Game::run()
             case GameStates::WaitOption:
                 gameStates = GameStates::Quit;
 
-                if (ptrTitleScreen->waitingForPlayerChoice())
+                if (ptrTitleScreen.waitingForPlayerChoice())
                 {
-                    ptrStage = new Stage(this);
+                    ptrStage = new Stage();
 
                     if (ptrStage == NULL)
                     {
                         cout << "Não foi possível criar \"ptrStage\"." << endl;
-                        return ERROR;
+                        return GAMEERROR;
                     }
 
                     gameStates = GameStates::GamePlay;
@@ -77,8 +77,8 @@ int Game::run()
             case GameStates::GamePlay:
                 switch (ptrStage->run())
                 {
-                    case ERROR:
-                        return ERROR;
+                    case GAMEERROR:
+                        return GAMEERROR;
 
                     default:
                     case BACKTOSTART:
@@ -110,7 +110,7 @@ void Game::setCursorPosition(short x, short y)
     SetConsoleCursorPosition(handle, cursorCoord);
 }
 
-void Game::setCursorPosition(Point &cursorCoordinate)
+void Game::setCursorPosition(Point& cursorCoordinate)
 {
     cursorCoord.X = cursorCoordinate.X();
     cursorCoord.Y = cursorCoordinate.Y();
@@ -189,22 +189,22 @@ void Game::testColors()
     system("Color 7");
     cout << endl;
     
-    //short combinedColor = 0x00;
+    short combinedColor = 0x00;
 
-    //for (short i = 0; i < 16; i++)
-    //{
-    //    combinedColor = i;
-    //    combinedColor <<= 4;
+    for (short i = 0; i < 16; i++)
+    {
+        combinedColor = i;
+        combinedColor <<= 4;
 
-    //    for (short j = 0; j < 16; j++)
-    //    {
-    //        combinedColor &= 0xF0;
-    //        combinedColor |= j;
+        for (short j = 0; j < 16; j++)
+        {
+            combinedColor &= 0xF0;
+            combinedColor |= j;
 
-    //        //SetConsoleTextAttribute(handle, combinedColor);
-    //        //cout << "Cor " << combinedColor << endl;
-    //        setConsoleColor(static_cast<ConsoleColor>(i), static_cast<ConsoleColor>(j));
-    //        cout << "Cor " << ((i << 4) | j) << endl;
-    //    }
-    //}
+            //SetConsoleTextAttribute(handle, combinedColor);
+            //cout << "Cor " << combinedColor << endl;
+            setTextColors(static_cast<ConsoleColor>(i), static_cast<ConsoleColor>(j));
+            cout << "Cor " << ((i << 4) | j) << endl;
+        }
+    }
 }
