@@ -1,4 +1,4 @@
-/* CREATED BY:      SmartBoyBR (A. Rodrigo Moreira)
+ï»¿/* CREATED BY:      SmartBoyBR (A. Rodrigo Moreira)
  * CREATED DATE:    2022-Apr-20
  *
  * FUNCTION: Source file with the implementations for drawing and managing the user interface.
@@ -64,8 +64,8 @@ void UI::drawUI()
 
 	Game::setCursorPosition(currentDrawPoint.X(), endDrawPoint.Y()); //9,5
 	cout << '+' << std::setfill('-') << std::setw(setWscoreToHiScore) << '+'
-		<< std::setfill('-') << std::setw(setWhiScoreToSnakePanel) << '+'
-		<< std::setfill('-') << std::setw(setWsnakePanelToEndPanels) << '+';
+		<< std::setw(setWhiScoreToSnakePanel) << '+'
+		<< std::setw(setWsnakePanelToEndPanels) << '+';
 	
 	// DRAW PANEL INFO
 	scorePanelPosition += { 2, 1 };
@@ -76,15 +76,13 @@ void UI::drawUI()
 	Game::setCursorPosition(hiScorePanelPosition); //34,4
 	cout << "RECORDE:";
 	Game::setCursorPosition(snakeSpeedPanelPosition); //58,4
-	cout << "VELOCIDADE DE MOVIMENTAÇÃO:";
+	cout << "TEMPO DE MOVIMENTAÃ‡ÃƒO:";
 	scorePanelPosition += { 8, 0 };
 	hiScorePanelPosition += { 9, 0 };
-	snakeSpeedPanelPosition += { 28, 0 };
+	snakeSpeedPanelPosition += { 23, 0 };
 	addScorePoints(0);
 	updateHiScorePoints();
 	updateSnakeSpeedValue(1);
-
-	Sleep(50000);
 }
 
 void UI::addScorePoints(unsigned short morePoints)
@@ -106,7 +104,7 @@ void UI::updateHiScorePoints()
 void UI::updateSnakeSpeedValue(unsigned short newSpeed)
 {
 	snakeSpeedPanelValue = newSpeed;
-	const string snakeSpeedPanelText = "1 segundo";
+	const string snakeSpeedPanelText = "900 microssegundos";
 
 	Game::setCursorPosition(snakeSpeedPanelPosition); //86,4
 	cout << snakeSpeedPanelText;

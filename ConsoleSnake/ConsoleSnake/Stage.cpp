@@ -28,6 +28,8 @@ int Stage::run()
 {
 	drawStageScreen();
 	ui.setupUI();
+	gridMap.drawGrid();
+	snake.setupMoveBoundaries();
 
 	return BACKTOSTART;
 }
@@ -47,20 +49,17 @@ void Stage::drawStageScreen()
 	currentDrawPoint += {0, 1};
 	Game::setCursorPosition(currentDrawPoint); // 9,3
 	short setW = endDrawPoint.X() - currentDrawPoint.X();
-	cout << '+' << std::setfill('-') << std::setw(setW) << '+' << endl;
+	cout << '+' << std::setfill('-') << std::setw(setW) << '+';
 
 	currentDrawPoint += {0, 1}; // 9,4
 
 	while (currentDrawPoint.Y() < endDrawPoint.Y())
 	{
 		Game::setCursorPosition(currentDrawPoint);
-		cout << '|' << std::right << std::setfill(' ') << std::setw(setW) << '|' << endl;
+		cout << '|' << std::setfill(' ') << std::setw(setW) << '|';
 		currentDrawPoint += {0, 1};
 	}
 
 	Game::setCursorPosition(currentDrawPoint); // 9,29
-	cout << '+' << std::setfill('-') << std::setw(setW) << '+' << endl;
-
-	Sleep(3000);
-
+	cout << '+' << std::setfill('-') << std::setw(setW) << '+';
 }

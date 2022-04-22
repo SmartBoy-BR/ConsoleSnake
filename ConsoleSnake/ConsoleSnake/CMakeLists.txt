@@ -4,6 +4,6 @@
 cmake_minimum_required (VERSION 3.8)
 
 # Adicione a origem ao executável deste projeto.
-add_executable (ConsoleSnake "ConsoleSnake.cpp" "Game.cpp" "Timer.cpp" "Stage.cpp" "Point.cpp" "TitleScreen.cpp" "UI.cpp")
+add_executable (ConsoleSnake "ConsoleSnake.cpp" "Game.cpp" "Timer.cpp" "Stage.cpp" "Point.cpp" "TitleScreen.cpp" "UI.cpp" "GridMap.cpp" "Snake.cpp" "BodyPiece.cpp")
 
 # TODO: Adicione testes e instale destinos, se necessário.

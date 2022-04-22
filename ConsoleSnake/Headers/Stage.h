@@ -8,6 +8,8 @@
 
 #include "../Headers/Point.h"
 #include "../Headers/UI.h"
+#include "../Headers/GridMap.h"
+#include "../Headers/Snake.h"
 
 enum class PlayStates { Playing, GameOver, BackToStart };
 
@@ -15,6 +17,8 @@ class Stage
 {
 	private:
 		UI			ui;
+		GridMap		gridMap;
+		Snake		snake;
 		PlayStates	playStates;
 
 		void drawStageScreen();

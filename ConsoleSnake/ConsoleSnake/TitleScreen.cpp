@@ -16,16 +16,19 @@ using std::endl;
 using std::string;
 
 bool TitleScreen::enableEnterMessage;
+bool TitleScreen::enableChoiceArrow;
 Point TitleScreen::blinkMsgPosition;
+Point TitleScreen::playerChoiceArrow;
 std::vector<short> TitleScreen::TitleScreenBackColors;
 short TitleScreen::numberLimit = 0;
 short TitleScreen::lastRandom = 0;
 
 TitleScreen::TitleScreen()
-    : playerChoiceArrow(52, 23)
 {
     enableEnterMessage = false;
+    enableChoiceArrow = false;
     blinkMsgPosition = { 52, 21 };
+    playerChoiceArrow = { 52, 23 };
     TitleScreenBackColors = { 1,2,3,4,6,7,8,9,10,11,12,13,14,15,30,32,48,78,87,96,113,125,128,142,159,160,222,224,240 };
     numberLimit = static_cast<short>(TitleScreenBackColors.size());
     lastRandom = 5; // Default color = 7.
@@ -39,6 +42,7 @@ int TitleScreen::prepareTitleScreen()
 {
     drawTitleScreen();
     Timer::setTimerAndCallback(125, &TitleScreen::blinkPressEnterMsg);
+    Timer::setTimerAndCallback(125, &TitleScreen::blinkChoiceArrow);
     Timer::setTimerAndCallback(2000, &TitleScreen::changeTitleScreenColors);
 
     return SUCCESS;
@@ -46,7 +50,8 @@ int TitleScreen::prepareTitleScreen()
 
 bool TitleScreen::waitingForPlayerChoice()
 {
-    short yPos = playerChoiceArrow.Y();
+    short yPosUp = playerChoiceArrow.Y();
+    short yPosDown = yPosUp + 1;
     short key = 0;
     bool startGameplay = true;
 
@@ -57,9 +62,9 @@ bool TitleScreen::waitingForPlayerChoice()
         if (_kbhit())
         {
             key = _getch();
-            //Game::setCursorPosition(46, 20);
-            //Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Black);
-            //cout << std::dec << key << " ";
+            /*Game::setCursorPosition(46, 20);
+            Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Black);
+            cout << std::dec << key << " ";*/
 
             if (key == static_cast<short>(KeyValues::SpecialKey1) ||
                 key == static_cast<short>(KeyValues::SpecialKey2))
@@ -69,16 +74,20 @@ bool TitleScreen::waitingForPlayerChoice()
 
             //cout << std::dec << key;
 
-            Game::setCursorPosition(playerChoiceArrow.X(), yPos);
-            cout << "  ";
-
             switch (key)
             {
                 case 'w':
                 case 'W':
                 case static_cast<short>(KeyValues::ArrowUp):
-                    yPos = playerChoiceArrow.Y();
-                    startGameplay = true;
+                    if (!startGameplay)
+                    {
+                        playerChoiceArrow = { playerChoiceArrow.X(), yPosUp };
+                        Game::setCursorPosition(playerChoiceArrow);
+                        cout << ">>";
+                        Game::setCursorPosition(playerChoiceArrow.X(), yPosDown);
+                        cout << "  ";
+                        startGameplay = true;
+                    }
                     break;
 
                 //case 'a':
@@ -94,22 +103,31 @@ bool TitleScreen::waitingForPlayerChoice()
                 case 's':
                 case 'S':
                 case static_cast<short>(KeyValues::ArrowDown):
-                    yPos = playerChoiceArrow.Y() + 1;
-                    startGameplay = false;
+                    if (startGameplay)
+                    {
+                        playerChoiceArrow = { playerChoiceArrow.X(), yPosDown };
+                        Game::setCursorPosition(playerChoiceArrow);
+                        cout << ">>";
+                        Game::setCursorPosition(playerChoiceArrow.X(), yPosUp);
+                        cout << "  ";
+                        startGameplay = false;
+                    }
                     break;
 
                 default:
                     break;
             }
 
-            Game::setCursorPosition(playerChoiceArrow.X(), yPos);
-            cout << ">>";
+            /*Game::setCursorPosition(46, 20);
+            Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Black);
+            cout << playerChoiceArrow.X() << "-" << playerChoiceArrow.Y();*/
         }
 
     } while (key != static_cast<short>(KeyValues::Enter));
 
     Timer::deleteTimer(&TitleScreen::blinkPressEnterMsg);
-    Timer::deleteTimer(&TitleScreen::changeTitleScreenColors);    
+    Timer::deleteTimer(&TitleScreen::blinkChoiceArrow);
+    Timer::deleteTimer(&TitleScreen::changeTitleScreenColors);
 
     return startGameplay;
 }
@@ -124,18 +142,18 @@ void TitleScreen::drawTitleScreen()
     // DRAW THE BORDERS
     Game::setCursorPosition(currentDrawPoint); // 3,1
     short setW = endDrawPoint.X() - currentDrawPoint.X();
-    cout << '+' << std::right << std::setfill('-') << std::setw(setW) << "+" << endl;
+    cout << '+' << std::setfill('-') << std::setw(setW) << '+';
 
     for (short yPos = currentDrawPoint.Y() + 1; yPos < endDrawPoint.Y(); yPos++)
     {
         Game::setCursorPosition(currentDrawPoint.X(), yPos);
         cout << '|';
         Game::setCursorPosition(endDrawPoint.X(), yPos);
-        cout << "| " << endl;
+        cout << '|';
     }
 
     Game::setCursorPosition(currentDrawPoint.X(), endDrawPoint.Y()); //3,32
-    cout << '+' << std::right << std::setfill('-') << std::setw(setW) << "+";
+    cout << '+' << std::setfill('-') << std::setw(setW) << '+';
     
     // DRAW GAME TITLE
     const short consoleStringYpos = 8;
@@ -163,8 +181,6 @@ void TitleScreen::drawTitleScreen()
     }
     
     // DRAW PLAYER OPTIONS
-    Game::setCursorPosition(playerChoiceArrow);//52,23
-    cout << ">>";
     currentDrawPoint += {19, 8};
     Game::setCursorPosition(currentDrawPoint);//55,23
     cout << "Inicia";
@@ -188,6 +204,17 @@ void TitleScreen::blinkPressEnterMsg()
         cout << "Tecle Enter!";
     else
         cout << "            ";
+}
+
+void TitleScreen::blinkChoiceArrow()
+{
+    enableChoiceArrow = !enableChoiceArrow;
+    Game::setCursorPosition(playerChoiceArrow);
+
+    if (enableChoiceArrow)
+        cout << ">>";
+    else
+        cout << "  ";
 }
 
 void TitleScreen::changeTitleScreenColors()
