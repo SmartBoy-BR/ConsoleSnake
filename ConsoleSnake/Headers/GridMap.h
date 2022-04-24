@@ -7,16 +7,21 @@
 #pragma once
 
 #include "../Headers/Point.h"
+#include "../Headers/Food.h"
 
 class GridMap
 {
 	private:
-		Point	upperPortalPosition;
-		Point	lowerPortalPosition;
+		static Point		upperPortalPosition;
+		static Point		lowerPortalPosition;
 
 		void drawPortals();
 
 	public:
+		static const char	BorderCharacter;
+
 		GridMap();
 		void drawGrid();
+		static Point getUpperPortalPosition();
+		static Point getLowerPortalPosition();
 };

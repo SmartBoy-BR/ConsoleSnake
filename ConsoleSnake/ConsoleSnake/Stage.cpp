@@ -26,10 +26,18 @@ Stage::~Stage()
 
 int Stage::run()
 {
-	drawStageScreen();
-	ui.setupUI();
-	gridMap.drawGrid();
-	snake.setupMoveBoundaries();
+	bool keepPlaying = false;
+
+	do
+	{
+		drawStageScreen();
+		ui.setupUI();
+		gridMap.drawGrid();
+		snake.setupMovementBoundaries();
+
+		keepPlaying = snake.runsGameplay();
+
+	} while (keepPlaying);
 
 	return BACKTOSTART;
 }
@@ -46,6 +54,10 @@ void Stage::drawStageScreen()
 	// DRAW THE STAGE BOUNDARIES
 	Game::setCursorPosition(currentDrawPoint); //9,2
 	cout << "CONSOLE SNAKE v1.0";
+
+	// SETS STAGE COLOR
+	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Purple);
+
 	currentDrawPoint += {0, 1};
 	Game::setCursorPosition(currentDrawPoint); // 9,3
 	short setW = endDrawPoint.X() - currentDrawPoint.X();

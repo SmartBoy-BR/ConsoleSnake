@@ -122,7 +122,6 @@ bool TitleScreen::waitingForPlayerChoice()
             Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Black);
             cout << playerChoiceArrow.X() << "-" << playerChoiceArrow.Y();*/
         }
-
     } while (key != static_cast<short>(KeyValues::Enter));
 
     Timer::deleteTimer(&TitleScreen::blinkPressEnterMsg);
@@ -135,6 +134,7 @@ bool TitleScreen::waitingForPlayerChoice()
 void TitleScreen::drawTitleScreen()
 {
     system("cls");
+    setsTitleScreenColors();
 
     Point currentDrawPoint(Game::StartScreenPoint); //3,1
     Point endDrawPoint(Game::EndScreenPoint); //111,32
@@ -228,8 +228,13 @@ void TitleScreen::changeTitleScreenColors()
 
     lastRandom = randomNumber;
 
+    setsTitleScreenColors();
+}
+
+void TitleScreen::setsTitleScreenColors()
+{
     char colorCmd[10];
-    sprintf_s(colorCmd, "Color %x", TitleScreenBackColors[randomNumber]);
+    sprintf_s(colorCmd, "Color %x", TitleScreenBackColors[lastRandom]);
 
     system(colorCmd);
     system(colorCmd); // Sometimes some borders remains in old color (bug?), then force color change.

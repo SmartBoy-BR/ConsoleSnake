@@ -110,11 +110,25 @@ void Game::setCursorPosition(short x, short y)
     SetConsoleCursorPosition(handle, cursorCoord);
 }
 
-void Game::setCursorPosition(Point& cursorCoordinate)
+void Game::setCursorPosition(const Point& cursorCoordinate)
 {
     cursorCoord.X = cursorCoordinate.X();
     cursorCoord.Y = cursorCoordinate.Y();
     SetConsoleCursorPosition(handle, cursorCoord);
+}
+
+char Game::getCursorPositionData(const Point& cursorCoordinate)
+{
+    char buffer = ' ';
+    DWORD total = 0;
+    COORD localCoord;
+
+    localCoord.X = cursorCoordinate.X();
+    localCoord.Y = cursorCoordinate.Y();
+
+    ReadConsoleOutputCharacterA(handle, &buffer, 1, localCoord, & total);
+
+    return (total > 0) ? buffer : ' ';
 }
 
 void Game::setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor)
@@ -171,23 +185,23 @@ void Game::testColors()
     
     //std::cout << "┌─┐ └─┘ │ ™ ® © ¤ ▓ ◉    !" << std::endl << std::endl;
 
-    for (short i = 0; i < 5; i++) //2,3,4,6,8,16,20,30,34,56,57,60,70,80,
-    {
-        string backColorCmd = "Color ";
-        backColorCmd.append(std::to_string(i));
-        system(backColorCmd.c_str());
+    //for (short i = 0; i < 5; i++) //2,3,4,6,8,16,20,30,34,56,57,60,70,80,
+    //{
+    //    string backColorCmd = "Color ";
+    //    backColorCmd.append(std::to_string(i));
+    //    system(backColorCmd.c_str());
 
-        setCursorPosition(30, 3);
-        cout << "COR " << i << "\t";
-        cout << "COR " << i << "\t";
-        cout << "COR " << i << "\t";
-        cout << "COR " << i << "\t";
-        cout << "COR " << i << "\t";
-        cout << "COR " << i;
-        Sleep(500);
-    }
+    //    setCursorPosition(30, 3);
+    //    cout << "COR " << i << "\t";
+    //    cout << "COR " << i << "\t";
+    //    cout << "COR " << i << "\t";
+    //    cout << "COR " << i << "\t";
+    //    cout << "COR " << i << "\t";
+    //    cout << "COR " << i;
+    //    Sleep(500);
+    //}
     system("Color 7");
-    cout << endl;
+    //cout << endl;
     
     short combinedColor = 0x00;
 

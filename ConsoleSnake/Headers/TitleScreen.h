@@ -24,6 +24,7 @@ class TitleScreen
 		static void blinkPressEnterMsg();
 		static void blinkChoiceArrow();
 		static void changeTitleScreenColors();
+		static void setsTitleScreenColors();
 
 	public:
 		TitleScreen();

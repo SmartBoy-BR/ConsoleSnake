@@ -10,8 +10,13 @@
 #include "../Headers/Game.h"
 
 using std::cout;
-using std::endl;
+//using std::endl;
 //using std::string;
+
+BodyPiece::BodyPiece()
+{
+	bodyConsoleSymbol = ' ';
+}
 
 BodyPiece::BodyPiece(Point gridPos, char bodySymbol)
 {
@@ -25,9 +30,19 @@ void BodyPiece::printBodyPiece()
 	cout << bodyConsoleSymbol;
 }
 
+char BodyPiece::getBodySymbol()
+{
+	return bodyConsoleSymbol;
+}
+
 Point BodyPiece::getPosition() { return gridPosition; }
 
 void BodyPiece::setPosition(Point newPosition)
 {
 	gridPosition = newPosition;
+}
+
+void BodyPiece::addToPosition(Point pointToAdd)
+{
+	gridPosition += pointToAdd;
 }

@@ -10,18 +10,29 @@
 #include "../Headers/Point.h"
 #include "../Headers/BodyPiece.h"
 
+using std::vector;
+
 class Snake
 {
 	private:
-		Point					startMovePosition;
-		Point					endMovePosition;
-		Point					moveDirection;
-		BodyPiece				head;
-		std::vector<BodyPiece>	body;
-		BodyPiece				tail;
+		const Point					MoveUp;
+		const Point					MoveDown;
+		const Point					MoveLeft;
+		const Point					MoveRight;
+		const unsigned short		BodyInitialAmount;
+		Point						startMovePosition;
+		Point						endMovePosition;
+		static Point				movementDirection;
+		static BodyPiece			head;
+		static vector<BodyPiece>	body;
+		static BodyPiece			tail;
+		static bool					isGameOver;
+
+		void createSnake();
+		static void movesTheSnake();
 
 	public:
 		Snake();
-		void setupMoveBoundaries();
-		void moveSnake();
+		void setupMovementBoundaries();
+		bool runsGameplay();
 };

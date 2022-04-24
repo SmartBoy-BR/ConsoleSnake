@@ -15,8 +15,11 @@ class BodyPiece
 		char	bodyConsoleSymbol;
 
 	public:
+		BodyPiece();
 		BodyPiece(Point gridPos, char bodySymbol);
 		void printBodyPiece();
+		char getBodySymbol();
 		Point getPosition();
 		void setPosition(Point newPosition);
+		void addToPosition(Point pointToAdd);
 };

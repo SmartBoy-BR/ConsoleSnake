@@ -141,6 +141,13 @@ build ConsoleSnake\CMakeFiles\ConsoleSnake.dir\BodyPiece.cpp.obj: CXX_COMPILER__
   TARGET_COMPILE_PDB = ConsoleSnake\CMakeFiles\ConsoleSnake.dir\
   TARGET_PDB = ConsoleSnake\ConsoleSnake.pdb
 
+build ConsoleSnake\CMakeFiles\ConsoleSnake.dir\Food.cpp.obj: CXX_COMPILER__ConsoleSnake_Debug ..\..\..\ConsoleSnake\Food.cpp || cmake_object_order_depends_target_ConsoleSnake
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  OBJECT_DIR = ConsoleSnake\CMakeFiles\ConsoleSnake.dir
+  OBJECT_FILE_DIR = ConsoleSnake\CMakeFiles\ConsoleSnake.dir
+  TARGET_COMPILE_PDB = ConsoleSnake\CMakeFiles\ConsoleSnake.dir\
+  TARGET_PDB = ConsoleSnake\ConsoleSnake.pdb
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target ConsoleSnake
@@ -149,7 +156,7 @@ build ConsoleSnake\CMakeFiles\ConsoleSnake.dir\BodyPiece.cpp.obj: CXX_COMPILER__
 #############################################
 # Link the executable ConsoleSnake\ConsoleSnake.exe
 
-build ConsoleSnake\ConsoleSnake.exe: CXX_EXECUTABLE_LINKER__ConsoleSnake_Debug ConsoleSnake\CMakeFiles\ConsoleSnake.dir\ConsoleSnake.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\Game.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\Timer.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\Stage.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\Point.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\TitleScreen.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\UI.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\GridMap.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\Snake.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\BodyPiece.cpp.obj
+build ConsoleSnake\ConsoleSnake.exe: CXX_EXECUTABLE_LINKER__ConsoleSnake_Debug ConsoleSnake\CMakeFiles\ConsoleSnake.dir\ConsoleSnake.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\Game.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\Timer.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\Stage.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\Point.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\TitleScreen.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\UI.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\GridMap.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\Snake.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\BodyPiece.cpp.obj ConsoleSnake\CMakeFiles\ConsoleSnake.dir\Food.cpp.obj
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib

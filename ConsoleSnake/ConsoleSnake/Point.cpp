@@ -28,8 +28,8 @@ Point::Point(const Point& otherPoint)
 	yCoordinate = otherPoint.yCoordinate;
 }
 
-int Point::X() { return xCoordinate; }
-int Point::Y() { return yCoordinate; }
+int Point::X() const { return xCoordinate; }
+int Point::Y() const { return yCoordinate; }
 
 Point Point::operator*(const int& value)
 {

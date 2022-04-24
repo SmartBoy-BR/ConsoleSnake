@@ -29,7 +29,7 @@ enum class KeyValues {
 #define CONSOLEWIDTH    114
 #define CONSOLEHEIGHT   33
 
-#define GAMEERROR       -1
+#define GAMEERROR   -1
 #define SUCCESS     0
 #define BACKTOSTART 1
 
@@ -57,7 +57,8 @@ class Game
         ~Game();
         int run();
         static void setCursorPosition(short x, short y);
-        static void setCursorPosition(Point& cursorCoordinate);
+        static void setCursorPosition(const Point& cursorCoordinate);
+        static char getCursorPositionData(const Point& cursorCoordinate);
         static void setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor);
         void testColors();
 };
