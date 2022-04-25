@@ -21,6 +21,7 @@ class Point
 		int X() const;
 		int Y() const;
 		Point operator*(const int& value);
+		Point& operator*=(const int& value);
 		Point operator*(const Point& otherPoint);
 		Point operator+(const Point& otherPoint);
 		Point operator-(const Point& otherPoint);

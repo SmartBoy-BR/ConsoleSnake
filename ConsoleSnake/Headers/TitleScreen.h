@@ -13,8 +13,8 @@ class TitleScreen
 {
 	private:
 		static Point				playerChoiceArrow;
-		static bool					enableEnterMessage;
-		static bool					enableChoiceArrow;
+		static bool					showEnterMessage;
+		static bool					showChoiceArrow;
 		static Point				blinkMsgPosition;
 		static std::vector<short>   TitleScreenBackColors;
 		static short                numberLimit;

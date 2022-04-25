@@ -6,11 +6,11 @@
 
 #pragma once
 
-#include <vector>
+#include <list>
 #include "../Headers/Point.h"
 #include "../Headers/BodyPiece.h"
 
-using std::vector;
+using std::list;
 
 class Snake
 {
@@ -23,12 +23,14 @@ class Snake
 		Point						startMovePosition;
 		Point						endMovePosition;
 		static Point				movementDirection;
+		static Point				lastMovementDirection;
 		static BodyPiece			head;
-		static vector<BodyPiece>	body;
+		static list<BodyPiece>		body;
 		static BodyPiece			tail;
 		static bool					isGameOver;
 
-		void createSnake();
+		void createSnakeHead();
+		void createSnakeBody();
 		static void movesTheSnake();
 
 	public:

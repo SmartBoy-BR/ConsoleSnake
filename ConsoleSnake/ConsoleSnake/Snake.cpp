@@ -11,19 +11,22 @@
 #include "../Headers/Timer.h"
 #include "../Headers/Game.h"
 #include "../Headers/GridMap.h"
+#include "../Headers/Food.h"
 
 using std::cout;
 using std::endl;
 //using std::string;
 
 Point Snake::movementDirection;
+Point Snake::lastMovementDirection;
 BodyPiece Snake::head;
-vector<BodyPiece> Snake::body;
+//vector<BodyPiece> Snake::body;
+list<BodyPiece> Snake::body;
 BodyPiece Snake::tail;
 bool Snake::isGameOver;
 
 Snake::Snake()
-	: MoveUp({ 0, -1 }), MoveDown({ 0, 1 }), MoveLeft({ -2, 0 }), MoveRight({ 2, 0 }), BodyInitialAmount(7)
+	: MoveUp({ 0, -1 }), MoveDown({ 0, 1 }), MoveLeft({ -2, 0 }), MoveRight({ 2, 0 }), BodyInitialAmount(9)
 {
 	isGameOver = false;
 }
@@ -37,20 +40,35 @@ void Snake::setupMovementBoundaries()
 	startMovePosition += {16, 8}; //19,9
 	endMovePosition -= {16, 7}; //95,25
 
-	createSnake();
-	Game::setCursorPosition(25,13);
+	createSnakeHead();
 	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Yellow);
-	cout << '¶';
-	Game::setCursorPosition(17,13);
-	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightRed);
-	cout << '@';
+	Game::setCursorPosition(Point(21, 10));
+	cout << Food::FoodCharacter;
+	Game::setCursorPosition(Point(19, 21));
+	cout << Food::FoodCharacter;
+	Game::setCursorPosition(Point(25, 14));
+	cout << Food::FoodCharacter;
+	Game::setCursorPosition(Point(57, 17));
+	cout << Food::FoodCharacter;
+	Game::setCursorPosition(Point(65, 9));
+	cout << Food::FoodCharacter;
+	Game::setCursorPosition(Point(79, 9));
+	cout << Food::FoodCharacter;
+	Game::setCursorPosition(Point(91, 24));
+	cout << Food::FoodCharacter;
+	Game::setCursorPosition(Point(93, 20));
+	cout << Food::FoodCharacter;
+	Game::setCursorPosition(Point(93, 25));
+	cout << Food::FoodCharacter;
+	Game::setCursorPosition(Point(95, 13));
+	cout << Food::FoodCharacter;
 }
 
 bool Snake::runsGameplay()
 {
     short key = 0;
 
-	Timer::setTimerAndCallback(1200, &Snake::movesTheSnake);
+	Timer::setTimerAndCallback(250, &Snake::movesTheSnake);
 
     while (key != static_cast<short>(KeyValues::Enter) && !isGameOver)
     {
@@ -68,42 +86,48 @@ bool Snake::runsGameplay()
 
             switch (key)
             {
-                case 'w':
-                case 'W':
-                case static_cast<short>(KeyValues::ArrowUp):
-                    if (movementDirection != MoveDown) movementDirection = MoveUp;
-                    break;
+				case 'w':
+				case 'W':
+				case static_cast<short>(KeyValues::ArrowUp):
+					if (lastMovementDirection != MoveDown) movementDirection = MoveUp;
+					break;
 
-                case 'a':
-                case 'A':
-                case static_cast<short>(KeyValues::ArrowLeft):
-					if (movementDirection != MoveRight) movementDirection = MoveLeft;
-                    break;
+				case 'a':
+				case 'A':
+				case static_cast<short>(KeyValues::ArrowLeft):
+					if (lastMovementDirection != MoveRight) movementDirection = MoveLeft;
+					break;
 
-                case 'd':
-                case 'D':
-                case static_cast<short>(KeyValues::ArrowRight):
-					if (movementDirection != MoveLeft) movementDirection = MoveRight;
-                    break;
+				case 'd':
+				case 'D':
+				case static_cast<short>(KeyValues::ArrowRight):
+					if (lastMovementDirection != MoveLeft) movementDirection = MoveRight;
+					break;
 
-                case 's':
-                case 'S':
-                case static_cast<short>(KeyValues::ArrowDown):
-					if (movementDirection != MoveUp) movementDirection = MoveDown;
-                    break;
+				case 's':
+				case 'S':
+				case static_cast<short>(KeyValues::ArrowDown):
+					if (lastMovementDirection != MoveUp) movementDirection = MoveDown;
+					break;
 
-                default:
-                    break;
+				default:
+					break;
             }
         }
+
+		Timer::run();
     }
 
 	Timer::deleteTimer(&Snake::movesTheSnake);
+	body.clear();
+
+	UI::deleteUItimers();
+	Sleep(1200);
 
 	return false;
 }
 
-void Snake::createSnake()
+void Snake::createSnakeHead()
 {
 	// RANDOMLY POSITION THE "HEAD" ON THE MAP
 	const short xCoordLimit = static_cast<short>((endMovePosition.X() - startMovePosition.X()) * 0.5) + 1;
@@ -113,8 +137,6 @@ void Snake::createSnake()
 
 	randomXcoord = (rand() % xCoordLimit); // Seed has already been generated with srand in the Game constructor.
 	randomYcoord = (rand() % yCoordLimit);
-
-	head.setPosition(startMovePosition + Point(randomXcoord * 2, randomYcoord));
 
 	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightAqua);
 	head = BodyPiece(startMovePosition + Point(randomXcoord * 2, randomYcoord), '@');
@@ -136,18 +158,77 @@ void Snake::createSnake()
 		else movementDirection = { 0, movementDirection.Y() / abs(movementDirection.Y()) };
 	}
 
+	createSnakeBody();
+}
+
+void Snake::createSnakeBody()
+{
 	// POSITIONS THE "BODY" FOLLOWING THE OPPOSITE MOVEMENT DIRECTION
 	Point oppositeMovementDirection = movementDirection * -1;
 	Point lastOppositeDirection = head.getPosition();
-	
+
+	//short keyForDebugCaseTest = _getch();
+
+	// Lambda expression to check collision during body drawing.
+	auto checkForOppositeCollision = [&oppositeMovementDirection, &lastOppositeDirection, this] ()
+	{
+		bool hadCollision = false;
+
+		// Changes the axis of the opposite direction if it is going to collide.
+		if ((!body.empty() && Game::getCursorPositionData(lastOppositeDirection) == body.front().getBodySymbol())
+			|| Game::getCursorPositionData(lastOppositeDirection) == GridMap::BorderCharacter
+			|| Game::getCursorPositionData(lastOppositeDirection) == head.getBodySymbol()
+			|| GridMap::isPortalsEntrance(lastOppositeDirection))
+		{
+			hadCollision = true;
+
+			lastOppositeDirection -= oppositeMovementDirection;
+
+			if (oppositeMovementDirection.Y() == 0)
+			{
+				oppositeMovementDirection = MoveDown;
+
+				if (lastOppositeDirection.sqrDistance({ lastOppositeDirection.X(), startMovePosition.Y() })
+					>= lastOppositeDirection.sqrDistance({ lastOppositeDirection.X(), endMovePosition.Y() }))
+				{
+					oppositeMovementDirection = MoveUp;
+				}
+			}
+			else// if (oppositeMovementDirection.X() == 0)
+			{
+				oppositeMovementDirection = MoveRight;
+
+				if (lastOppositeDirection.sqrDistance({ startMovePosition.X(), lastOppositeDirection.Y() })
+					>= lastOppositeDirection.sqrDistance({ endMovePosition.X(), lastOppositeDirection.Y() }))
+				{
+					oppositeMovementDirection = MoveLeft;
+				}
+			}
+		}
+
+		return hadCollision;
+	};
+
 	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightGreen);
 	for (short i = 0; i < BodyInitialAmount; i++)
 	{
-		lastOppositeDirection += oppositeMovementDirection; // criar swap no Point
+		// NOTE: Needs improvements. Does not check very specific cases.
+		// CASE TEST: "BodyInitialAmount" = 150 and "head position" starting at 91,24.
+		do
+		{
+			lastOppositeDirection += oppositeMovementDirection;
+		} while (checkForOppositeCollision());
+
 		body.push_back(BodyPiece(lastOppositeDirection, '#'));
 		body.back().printBodyPiece();
+		//keyForDebugCaseTest = _getch();
 	}
-	
+
+	do
+	{
+		lastOppositeDirection += oppositeMovementDirection;
+	} while (checkForOppositeCollision());
+
 	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightYellow);
 	tail = BodyPiece(lastOppositeDirection, '$');
 	tail.printBodyPiece();
@@ -156,21 +237,28 @@ void Snake::createSnake()
 void Snake::movesTheSnake()
 {
 	Point nextHeadPosition = head.getPosition() + movementDirection;
+	Point lastPosition = head.getPosition();
+	Point lastTailPosition = tail.getPosition();
+
+	bool hadGridMapCollision = false;
+	bool hadBodyCollision = false;
+	bool gotSomeFood = false;
 
 	// CHECK COLLISIONS WITH GRID MAP BOUNDARIES
 	if (Game::getCursorPositionData(nextHeadPosition) == GridMap::BorderCharacter)
 	{
-		Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightRed);
-		isGameOver = true;
+		hadGridMapCollision = isGameOver = true;
 	}
 	
 	// CHECK COLLISIONS WITH THE BODY ITSELF
 	if (Game::getCursorPositionData(nextHeadPosition) == body.front().getBodySymbol() ||
 		Game::getCursorPositionData(nextHeadPosition) == tail.getBodySymbol())
 	{
-		Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightRed);
-		isGameOver = true;
+		hadBodyCollision = isGameOver = true;
 	}
+
+	// CHECK COLLISIONS WITH FOOD
+	gotSomeFood = (Game::getCursorPositionData(nextHeadPosition) == Food::FoodCharacter);
 
 	// PERFORMS TELETRANSPORT ACTION
 	if (nextHeadPosition == GridMap::getUpperPortalPosition()) head.setPosition(GridMap::getLowerPortalPosition());
@@ -178,7 +266,29 @@ void Snake::movesTheSnake()
 
 	// PERFORM THE MOVEMENT
 	head.addToPosition(movementDirection);
+	lastMovementDirection = movementDirection;
+	if (gotSomeFood)
+	{
+		UI::addScorePoints(100);
+		Timer::setTimerAndCallback(UI::getSpeedPanelValue(), &Snake::movesTheSnake);
+	}
 
+	Point lastPiecePosition = body.back().getPosition();
+	body.push_front(body.back());
+	body.front().setPosition(lastPosition);
+	body.pop_back();
+	lastPosition = lastPiecePosition;
+
+	/*for (BodyPiece& bPiece : body) // loop all
+	{
+		Point lastPiecePosition = bPiece.getPosition();
+		bPiece.setPosition(lastPosition);
+		lastPosition = lastPiecePosition;
+	}*/
+	tail.setPosition(lastPosition);
+	lastPosition = lastTailPosition;
+
+	// TURN OFF THE TIMER OR KEEP THE DEFAULT HEAD COLOR
 	if (isGameOver)
 	{
 		Timer::deleteTimer(&Snake::movesTheSnake);
@@ -188,6 +298,25 @@ void Snake::movesTheSnake()
 		Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightAqua);
 	}
 
-	head.printBodyPiece();
-	if (isGameOver) Sleep(5000);
+	// PRINT THE NEW POSITIONS
+	if (!isGameOver) head.printBodyPiece();
+
+	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightGreen);
+	for (BodyPiece& bPiece : body)
+	{
+		bPiece.printBodyPiece();
+	}
+
+	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightYellow);
+	tail.printBodyPiece();
+	Game::setCursorPosition(lastPosition);
+	cout << ' ';
+
+	if (isGameOver)
+	{
+		if (hadGridMapCollision) Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightRed);
+		else if (hadBodyCollision) Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightRed);
+
+		head.printBodyPiece();
+	}
 }

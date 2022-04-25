@@ -12,6 +12,7 @@
 using std::cout;
 using std::endl;
 using std::string;
+using std::setfill;
 
 Point GridMap::upperPortalPosition;
 Point GridMap::lowerPortalPosition;
@@ -45,46 +46,58 @@ void GridMap::drawGrid()
 	// DRAW THE ARENA EDGES
 	Game::setCursorPosition(currentDrawPoint); // 16,8
 	short setW = endDrawPoint.X() - currentDrawPoint.X();
-	cout << BorderCharacter << std::setfill(BorderCharacter) << std::setw(setW) << BorderCharacter;
+	cout << BorderCharacter << setfill(BorderCharacter) << std::setw(setW) << BorderCharacter;
 
 	currentDrawPoint += {0, 1}; // 16,9
 
 	while (currentDrawPoint.Y() < endDrawPoint.Y())
 	{
 		Game::setCursorPosition(currentDrawPoint);
-		cout << std::setw(2) << BorderCharacter;
+		cout << std::setw(2) << BorderCharacter; // "setfill" is BorderCharacter
 		Game::setCursorPosition(endDrawPoint.X() - 1, currentDrawPoint.Y());
 		cout << std::setw(2) << BorderCharacter;
 		currentDrawPoint += {0, 1};
 	}
 
 	Game::setCursorPosition(currentDrawPoint); // 16,26
-	cout << BorderCharacter << std::setfill(BorderCharacter) << std::setw(setW) << BorderCharacter;
+	cout << BorderCharacter << setfill(BorderCharacter) << std::setw(setW) << BorderCharacter;
 
 	// DRAW THE PORTALS IN RANDOM POSITIONS
 	drawPortals();
 }
 
+bool GridMap::isPortalsEntrance(const Point& pointToCheck)
+{
+	Point upperEntrance = upperPortalPosition + Point(0, 1);
+	Point lowerEntrance = lowerPortalPosition - Point(0, 1);
+
+	return (upperEntrance == pointToCheck || lowerEntrance == pointToCheck);
+}
+
+Point GridMap::getUpperPortalPosition() { return upperPortalPosition; }
+
+Point GridMap::getLowerPortalPosition() { return lowerPortalPosition; }
+
 void GridMap::drawPortals()
 {
 	// RANDOMLY POSITION THE PORTALS
 	const short xCoordLimit = static_cast<short>((lowerPortalPosition.X() - upperPortalPosition.X()) * 0.5) + 1;
-	short randomXcoord;
+	short randomXcoord = 0;
 
 	randomXcoord = (rand() % xCoordLimit); // Seed has already been generated with srand in the Game constructor.
 	upperPortalPosition += {randomXcoord * 2, 0};
 	randomXcoord = (rand() % xCoordLimit);
 	lowerPortalPosition -= {randomXcoord * 2, 0};
 
-	auto printHalfPortal = [](const Point& position)
+	auto printHalfPortal = [](const Point& position) // Lambda expression to draw half portal.
 	{
 		Game::setCursorPosition(position);
 		Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Purple);
-		cout << "||";
+		cout << std::setw(2) << BorderCharacter; // "setfill" is BorderCharacter.
 		Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Purple);
 		cout << "   ";
 		Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Purple);
-		cout << "||";
+		cout << std::setw(2) << BorderCharacter;
 	};
 
 	printHalfPortal(upperPortalPosition);// ?, 8
@@ -99,7 +112,3 @@ void GridMap::drawPortals()
 	upperPortalPosition += { 3, 0 };
 	lowerPortalPosition += { 3, 0 };
 }
-
-Point GridMap::getUpperPortalPosition() { return upperPortalPosition; }
-
-Point GridMap::getLowerPortalPosition() { return lowerPortalPosition; }

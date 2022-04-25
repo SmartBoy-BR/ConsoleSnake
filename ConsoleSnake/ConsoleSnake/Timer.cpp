@@ -73,6 +73,16 @@ void Timer::setTimerAndCallback(long timerInMilliSeconds, void (*fcnPtr)())
 {
 	if (fcnPtr != NULL)
 	{
+		// Change the timer if callback already exists.
+		for (short indextToDelete = 0; indextToDelete < callbackMethods.size(); indextToDelete++)
+		{
+			if (callbackMethods[indextToDelete] == fcnPtr)
+			{
+				std::get<1>(timersCounter[indextToDelete]) = timerInMilliSeconds;
+				return;
+			}
+		}
+
 		callbackMethods.push_back(fcnPtr);
 		timersCounter.push_back(std::make_tuple(timerInMilliSeconds, timerInMilliSeconds));
 	}
@@ -80,7 +90,7 @@ void Timer::setTimerAndCallback(long timerInMilliSeconds, void (*fcnPtr)())
 
 void Timer::deleteTimer(void (*fcnPtr)())
 {
-	int indextToDelete;
+	short indextToDelete;
 	bool hasTimerToDelete = false;
 
 	for (indextToDelete = 0; indextToDelete < callbackMethods.size(); indextToDelete++)

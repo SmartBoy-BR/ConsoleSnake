@@ -22,6 +22,7 @@ class GridMap
 
 		GridMap();
 		void drawGrid();
+		static bool isPortalsEntrance(const Point& pointToCheck);
 		static Point getUpperPortalPosition();
 		static Point getLowerPortalPosition();
 };

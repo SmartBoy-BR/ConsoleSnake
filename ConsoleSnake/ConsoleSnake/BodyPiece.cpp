@@ -5,7 +5,7 @@
  */
 
 #include <iostream>
-#include <iomanip>
+//#include <iomanip>
 #include "../Headers/BodyPiece.h"
 #include "../Headers/Game.h"
 
@@ -15,7 +15,7 @@ using std::cout;
 
 BodyPiece::BodyPiece()
 {
-	bodyConsoleSymbol = ' ';
+	bodyConsoleSymbol = '?';
 }
 
 BodyPiece::BodyPiece(Point gridPos, char bodySymbol)

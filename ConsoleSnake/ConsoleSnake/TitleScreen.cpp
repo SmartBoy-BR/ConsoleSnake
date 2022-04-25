@@ -15,8 +15,8 @@ using std::cout;
 using std::endl;
 using std::string;
 
-bool TitleScreen::enableEnterMessage;
-bool TitleScreen::enableChoiceArrow;
+bool TitleScreen::showEnterMessage;
+bool TitleScreen::showChoiceArrow;
 Point TitleScreen::blinkMsgPosition;
 Point TitleScreen::playerChoiceArrow;
 std::vector<short> TitleScreen::TitleScreenBackColors;
@@ -25,8 +25,8 @@ short TitleScreen::lastRandom = 0;
 
 TitleScreen::TitleScreen()
 {
-    enableEnterMessage = false;
-    enableChoiceArrow = false;
+    showEnterMessage = false;
+    showChoiceArrow = false;
     blinkMsgPosition = { 52, 21 };
     playerChoiceArrow = { 52, 23 };
     TitleScreenBackColors = { 1,2,3,4,6,7,8,9,10,11,12,13,14,15,30,32,48,78,87,96,113,125,128,142,159,160,222,224,240 };
@@ -62,17 +62,12 @@ bool TitleScreen::waitingForPlayerChoice()
         if (_kbhit())
         {
             key = _getch();
-            /*Game::setCursorPosition(46, 20);
-            Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Black);
-            cout << std::dec << key << " ";*/
 
             if (key == static_cast<short>(KeyValues::SpecialKey1) ||
                 key == static_cast<short>(KeyValues::SpecialKey2))
             {
                 key = _getch(); // One more reading is needed to get the actual key pressed.
             }
-
-            //cout << std::dec << key;
 
             switch (key)
             {
@@ -89,16 +84,6 @@ bool TitleScreen::waitingForPlayerChoice()
                         startGameplay = true;
                     }
                     break;
-
-                //case 'a':
-                //case 'A':
-                //case static_cast<short>(KeyValues::ArrowLeft):
-                //    break;
-
-                //case 'd':
-                //case 'D':
-                //case static_cast<short>(KeyValues::ArrowRight):
-                //    break;
 
                 case 's':
                 case 'S':
@@ -117,10 +102,6 @@ bool TitleScreen::waitingForPlayerChoice()
                 default:
                     break;
             }
-
-            /*Game::setCursorPosition(46, 20);
-            Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Black);
-            cout << playerChoiceArrow.X() << "-" << playerChoiceArrow.Y();*/
         }
     } while (key != static_cast<short>(KeyValues::Enter));
 
@@ -197,10 +178,10 @@ void TitleScreen::drawTitleScreen()
 
 void TitleScreen::blinkPressEnterMsg()
 {
-    enableEnterMessage = !enableEnterMessage;
+    showEnterMessage = !showEnterMessage;
     Game::setCursorPosition(blinkMsgPosition);
 
-    if (enableEnterMessage)
+    if (showEnterMessage)
         cout << "Tecle Enter!";
     else
         cout << "            ";
@@ -208,10 +189,10 @@ void TitleScreen::blinkPressEnterMsg()
 
 void TitleScreen::blinkChoiceArrow()
 {
-    enableChoiceArrow = !enableChoiceArrow;
+    showChoiceArrow = !showChoiceArrow;
     Game::setCursorPosition(playerChoiceArrow);
 
-    if (enableChoiceArrow)
+    if (showChoiceArrow)
         cout << ">>";
     else
         cout << "  ";

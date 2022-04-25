@@ -29,7 +29,7 @@ Game::Game()
     gameStates = GameStates::TitleScreen;
     handle = GetStdHandle(STD_OUTPUT_HANDLE);
     cursorCoord = { 0, 0 };
-    lastHiScorePoints = 1250;
+    lastHiScorePoints = 100;
     ccInfo = new CONSOLE_CURSOR_INFO();
     consoleWindow = NULL;
     windowLong = 0;
@@ -103,7 +103,7 @@ int Game::run()
     return SUCCESS;
 }
 
-void Game::setCursorPosition(short x, short y)
+void Game::setCursorPosition(SHORT x, SHORT y)
 {
     cursorCoord.X = x;
     cursorCoord.Y = y;
@@ -112,9 +112,10 @@ void Game::setCursorPosition(short x, short y)
 
 void Game::setCursorPosition(const Point& cursorCoordinate)
 {
-    cursorCoord.X = cursorCoordinate.X();
+    /*cursorCoord.X = cursorCoordinate.X();
     cursorCoord.Y = cursorCoordinate.Y();
-    SetConsoleCursorPosition(handle, cursorCoord);
+    SetConsoleCursorPosition(handle, cursorCoord);*/
+    setCursorPosition(cursorCoordinate.X(), cursorCoordinate.Y());
 }
 
 char Game::getCursorPositionData(const Point& cursorCoordinate)

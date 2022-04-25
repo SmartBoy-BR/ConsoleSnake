@@ -11,7 +11,10 @@
 class Food
 {
 	private:
+		Point	gridPosition;
 
 	public:
+		static const char	FoodCharacter;
+
 		Food();
 };

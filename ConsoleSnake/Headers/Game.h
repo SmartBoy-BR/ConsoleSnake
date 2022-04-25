@@ -56,7 +56,7 @@ class Game
         Game();
         ~Game();
         int run();
-        static void setCursorPosition(short x, short y);
+        static void setCursorPosition(SHORT x, SHORT y);
         static void setCursorPosition(const Point& cursorCoordinate);
         static char getCursorPositionData(const Point& cursorCoordinate);
         static void setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor);

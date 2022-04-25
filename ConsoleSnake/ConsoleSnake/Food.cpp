@@ -13,6 +13,8 @@ using std::cout;
 using std::endl;
 using std::string;
 
+const char Food::FoodCharacter = 'o';
+
 Food::Food()
 {
 

@@ -41,6 +41,12 @@ Point Point::operator*(const int& value)
 	return result;
 }
 
+Point& Point::operator*=(const int& value)
+{
+	*this = operator*(value);
+	return *this;
+}
+
 Point Point::operator*(const Point& otherPoint)
 {
 	Point result = {
