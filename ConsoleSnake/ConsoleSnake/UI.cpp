@@ -14,7 +14,7 @@ using std::cout;
 using std::endl;
 using std::string;
 
-bool UI::showScorePoints;
+/*bool UI::showScorePoints;
 bool UI::showHiScorePoints;
 bool UI::showSpeedValue;
 Point UI::scorePanelPosition;
@@ -25,7 +25,7 @@ unsigned short UI::pointsToAdd;
 unsigned short UI::hiScorePanelPoints;
 unsigned short UI::snakeSpeedPanelValue;
 unsigned short UI::speedToDecrement;
-std::vector<void (*)()> UI::blinkMethods;
+std::vector<void (*)(void*)> UI::blinkMethods;*/
 
 UI::UI()
 {
@@ -56,21 +56,21 @@ void UI::addScorePoints(unsigned short morePoints)
 
 	pointsToAdd += morePoints;
 
-	blinkMethods.push_back(&UI::blinkScore);
+	blinkMethods.push_back(&UI::blinkScore_callBack);
 
 	if (hiScorePanelPoints < scorePanelPoints + pointsToAdd)
-		blinkMethods.push_back(&UI::blinkHiScore);
+		blinkMethods.push_back(&UI::blinkHiScore_callBack);
 
 	if (((scorePanelPoints + pointsToAdd) % 300) == 0)
 	{
 		speedToDecrement = 25;
-		blinkMethods.push_back(&UI::blinkSpeedValue);
+		blinkMethods.push_back(&UI::blinkSpeedValue_callBack);
 	}
 
-	Timer::setTimerAndCallback(1000, &UI::prepareToStopBlinking);
+	Timer::setTimerAndCallback(1000, this, &UI::prepareToStopBlinking_callBack);
 
 	for (auto method : blinkMethods)
-		Timer::setTimerAndCallback(100, method);
+		Timer::setTimerAndCallback(100, this, method);
 }
 
 unsigned short UI::getSpeedPanelValue()
@@ -80,14 +80,15 @@ unsigned short UI::getSpeedPanelValue()
 
 void UI::deleteUItimers()
 {
-	Timer::deleteTimer(&UI::prepareToStopBlinking);
-	Timer::deleteTimer(&UI::stopBlinking);
+	/*Timer::markTimerForDeletion(&UI::prepareToStopBlinking_callBack);
+	Timer::markTimerForDeletion(&UI::stopBlinking_callBack);
 
 	for (auto method : blinkMethods)
-		Timer::deleteTimer(method);
+		Timer::markTimerForDeletion(method);
 
-	Timer::deleteTimer(&UI::stopBlinking);
+	Timer::markTimerForDeletion(&UI::stopBlinking_callBack);*/
 	blinkMethods.clear();
+	Timer::clearAll();
 
 	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightGreen);
 	writeScore();
@@ -222,20 +223,20 @@ void UI::prepareToStopBlinking()
 	snakeSpeedPanelValue -= speedToDecrement;
 	speedToDecrement = 0;
 	
-	Timer::setTimerAndCallback(1000, &UI::stopBlinking);
+	Timer::setTimerAndCallback(1000, this, &UI::stopBlinking_callBack);
 	
 	for (auto method : blinkMethods)
-		Timer::setTimerAndCallback(200, method);
+		Timer::setTimerAndCallback(200, this, method);
 	
-	Timer::deleteTimer(&UI::prepareToStopBlinking);
+	Timer::markTimerForDeletion(&UI::prepareToStopBlinking_callBack);
 }
 
 void UI::stopBlinking()
 {
 	for (auto method : blinkMethods)
-		Timer::deleteTimer(method);
+		Timer::markTimerForDeletion(method);
 	
-	Timer::deleteTimer(&UI::stopBlinking);
+	Timer::markTimerForDeletion(&UI::stopBlinking_callBack);
 
 	showScorePoints = false;
 	showHiScorePoints = false;
@@ -248,4 +249,29 @@ void UI::stopBlinking()
 	writeSpeedValue();
 
 	blinkMethods.clear();
+}
+
+void UI::blinkScore_callBack(void* ownerObject)
+{
+	reinterpret_cast<UI*>(ownerObject)->blinkScore();
+}
+
+void UI::blinkHiScore_callBack(void* ownerObject)
+{
+	reinterpret_cast<UI*>(ownerObject)->blinkHiScore();
+}
+
+void UI::blinkSpeedValue_callBack(void* ownerObject)
+{
+	reinterpret_cast<UI*>(ownerObject)->blinkSpeedValue();
+}
+
+void UI::prepareToStopBlinking_callBack(void* ownerObject)
+{
+	reinterpret_cast<UI*>(ownerObject)->prepareToStopBlinking();
+}
+
+void UI::stopBlinking_callBack(void* ownerObject)
+{
+	reinterpret_cast<UI*>(ownerObject)->stopBlinking();
 }

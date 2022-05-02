@@ -9,19 +9,21 @@
 #include <chrono>
 #include <vector>
 
+using callbackAndTimersTuple = std::tuple<void*, void (*)(void*), long, long, bool>;
+
 class Timer
 {
     private:
         Timer();
         static bool isRunning;
         static std::chrono::high_resolution_clock::time_point previousTimePoint;
-        static std::vector<std::tuple<long, long>> timersCounter;
-        static std::vector<void (*)()> callbackMethods;
+        static std::vector<callbackAndTimersTuple> methodsAndTimersToAdd;
+        static std::vector<callbackAndTimersTuple> callbackMethodsAndTimers;
         static void startTimer();
-
 
     public:
         static bool run();
-        static void setTimerAndCallback(long timerInMilliSeconds, void (*fcnPtr)());
-        static void deleteTimer(void (*fcnPtr)());
+        static void setTimerAndCallback(long timerInMilliSeconds, void* ownerObject, void (*methodPtr)(void* ownerObject));
+        static void markTimerForDeletion(void (*methodPtr)(void* ownerObject));
+        static void clearAll();
 };

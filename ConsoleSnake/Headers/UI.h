@@ -9,37 +9,44 @@
 #include <vector>
 #include "../Headers/Point.h"
 
+using std::vector;
+
 class UI
 {
 	private:
-		static bool						showScorePoints;
-		static bool						showHiScorePoints;
-		static bool						showSpeedValue;
-		static Point					scorePanelPosition;
-		static Point					hiScorePanelPosition;
-		static Point					snakeSpeedPanelPosition;
-		static unsigned short			scorePanelPoints;
-		static unsigned short			pointsToAdd;
-		static unsigned short			hiScorePanelPoints;
-		static unsigned short			snakeSpeedPanelValue;
-		static unsigned short			speedToDecrement;
-		static std::vector<void (*)()>	blinkMethods;
+		bool					showScorePoints;
+		bool					showHiScorePoints;
+		bool					showSpeedValue;
+		Point					scorePanelPosition;
+		Point					hiScorePanelPosition;
+		Point					snakeSpeedPanelPosition;
+		unsigned short			scorePanelPoints;
+		unsigned short			pointsToAdd;
+		unsigned short			hiScorePanelPoints;
+		unsigned short			snakeSpeedPanelValue;
+		unsigned short			speedToDecrement;
+		vector<void (*)(void*)>	blinkMethods;
 
+		static void blinkScore_callBack(void* ownerObject);
+		static void blinkHiScore_callBack(void* ownerObject);
+		static void blinkSpeedValue_callBack(void* ownerObject);
+		static void prepareToStopBlinking_callBack(void* ownerObject);
+		static void stopBlinking_callBack(void* ownerObject);
 
 		void drawUI();
-		static void blinkScore();
-		static void blinkHiScore();
-		static void blinkSpeedValue();
-		static void writeScore();
-		static void writeHiScore();
-		static void writeSpeedValue();
-		static void prepareToStopBlinking();
-		static void stopBlinking();
+		void blinkScore();
+		void blinkHiScore();
+		void blinkSpeedValue();
+		void writeScore();
+		void writeHiScore();
+		void writeSpeedValue();
+		void prepareToStopBlinking();
+		void stopBlinking();
 
 	public:
 		UI();
 		void setupUI();
-		static void addScorePoints(unsigned short morePoints);
-		static unsigned short getSpeedPanelValue();
-		static void deleteUItimers();
+		void addScorePoints(unsigned short morePoints);
+		unsigned short getSpeedPanelValue();
+		void deleteUItimers();
 };

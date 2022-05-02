@@ -6,22 +6,26 @@
 
 #pragma once
 
+#include "../Headers/Snake.h"
 #include "../Headers/Point.h"
 #include "../Headers/Food.h"
 
 class GridMap
 {
 	private:
-		static Point		upperPortalPosition;
-		static Point		lowerPortalPosition;
+		Snake*			snake;
+		static Point	upperPortalPosition;
+		static Point	lowerPortalPosition;
 
 		void drawPortals();
 
 	public:
 		static const char	BorderCharacter;
 
-		GridMap();
+		GridMap(UI& ref);
+		~GridMap();
 		void drawGrid();
+		int run();
 		static bool isPortalsEntrance(const Point& pointToCheck);
 		static Point getUpperPortalPosition();
 		static Point getLowerPortalPosition();

@@ -17,27 +17,28 @@ using std::string;
 
 Stage::Stage()
 {
+	gridMap = NULL;
 	playStates = PlayStates::Playing;
 }
 
 Stage::~Stage()
 {
+	delete gridMap;
+	gridMap = NULL;
 }
 
 int Stage::run()
 {
-	bool keepPlaying = false;
+	drawStageScreen();
+	ui.setupUI();
 
-	do
+	gridMap = new GridMap(ui);
+
+	if (gridMap != NULL)
 	{
-		drawStageScreen();
-		ui.setupUI();
-		gridMap.drawGrid();
-		snake.setupMovementBoundaries();
-
-		keepPlaying = snake.runsGameplay();
-
-	} while (keepPlaying);
+		gridMap->drawGrid();
+		gridMap->run();
+	}
 
 	return BACKTOSTART;
 }
@@ -47,17 +48,17 @@ void Stage::drawStageScreen()
 	Point currentDrawPoint(Game::StartScreenPoint); //3,1
 	Point endDrawPoint(Game::EndScreenPoint); //111,32
 
-	// ADJUST TO CENTER COORDINATES
+	// ADJUSTS TO THE STAGE BOUNDARIES
 	currentDrawPoint += {6, 1};
 	endDrawPoint -= {6, 3};
 
-	// DRAW THE STAGE BOUNDARIES
 	Game::setCursorPosition(currentDrawPoint); //9,2
 	cout << "CONSOLE SNAKE v1.0";
 
 	// SETS STAGE COLOR
 	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Purple);
 
+	// DRAWS THE STAGE BOUNDARIES
 	currentDrawPoint += {0, 1};
 	Game::setCursorPosition(currentDrawPoint); // 9,3
 	short setW = endDrawPoint.X() - currentDrawPoint.X();

@@ -9,32 +9,38 @@
 #include <list>
 #include "../Headers/Point.h"
 #include "../Headers/BodyPiece.h"
+#include "../Headers/UI.h"
 
 using std::list;
 
 class Snake
 {
 	private:
-		const Point					MoveUp;
-		const Point					MoveDown;
-		const Point					MoveLeft;
-		const Point					MoveRight;
-		const unsigned short		BodyInitialAmount;
-		Point						startMovePosition;
-		Point						endMovePosition;
-		static Point				movementDirection;
-		static Point				lastMovementDirection;
-		static BodyPiece			head;
-		static list<BodyPiece>		body;
-		static BodyPiece			tail;
-		static bool					isGameOver;
+		UI&						refUi;
+		const Point				MoveUp;
+		const Point				MoveDown;
+		const Point				MoveLeft;
+		const Point				MoveRight;
+		const unsigned short	BodyInitialAmount;
 
+		Point			startMovePosition;
+		Point			endMovePosition;
+		Point			movementDirection;
+		Point			lastMovementDirection;
+		BodyPiece		head;
+		list<BodyPiece>	body;
+		BodyPiece		tail;
+		bool			isGameOver;
+
+		static void movesTheSnake_callBack(void* ownerObject);
+
+		int processesInputs();
 		void createSnakeHead();
 		void createSnakeBody();
-		static void movesTheSnake();
+		void movesTheSnake();
 
 	public:
-		Snake();
+		Snake(UI& ref);
 		void setupMovementBoundaries();
 		bool runsGameplay();
 };

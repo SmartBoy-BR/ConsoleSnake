@@ -6,6 +6,7 @@
 
 #include <conio.h>
 #include <iostream>
+#include <functional>
 #include <iomanip>
 #include "../Headers/TitleScreen.h"
 #include "../Headers/Timer.h"
@@ -15,22 +16,14 @@ using std::cout;
 using std::endl;
 using std::string;
 
-bool TitleScreen::showEnterMessage;
-bool TitleScreen::showChoiceArrow;
-Point TitleScreen::blinkMsgPosition;
-Point TitleScreen::playerChoiceArrow;
-std::vector<short> TitleScreen::TitleScreenBackColors;
-short TitleScreen::numberLimit = 0;
-short TitleScreen::lastRandom = 0;
-
 TitleScreen::TitleScreen()
 {
     showEnterMessage = false;
     showChoiceArrow = false;
     blinkMsgPosition = { 52, 21 };
     playerChoiceArrow = { 52, 23 };
-    TitleScreenBackColors = { 1,2,3,4,6,7,8,9,10,11,12,13,14,15,30,32,48,78,87,96,113,125,128,142,159,160,222,224,240 };
-    numberLimit = static_cast<short>(TitleScreenBackColors.size());
+    titleScreenBackColors = { 1,2,3,4,6,7,8,9,10,11,12,13,14,15,30,32,48,78,87,96,113,125,128,142,159,160,222,224,240 };
+    numberLimit = static_cast<short>(titleScreenBackColors.size());
     lastRandom = 5; // Default color = 7.
 }
 
@@ -41,9 +34,9 @@ TitleScreen::~TitleScreen()
 int TitleScreen::prepareTitleScreen()
 {
     drawTitleScreen();
-    Timer::setTimerAndCallback(125, &TitleScreen::blinkPressEnterMsg);
-    Timer::setTimerAndCallback(125, &TitleScreen::blinkChoiceArrow);
-    Timer::setTimerAndCallback(2000, &TitleScreen::changeTitleScreenColors);
+    Timer::setTimerAndCallback(125, this, &TitleScreen::blinkPressEnterMsg_callBack);
+    Timer::setTimerAndCallback(125, this, &TitleScreen::blinkChoiceArrow_callBack);
+    Timer::setTimerAndCallback(2000, this, &TitleScreen::changeTitleScreenColors_callBack);
 
     return SUCCESS;
 }
@@ -105,9 +98,7 @@ bool TitleScreen::waitingForPlayerChoice()
         }
     } while (key != static_cast<short>(KeyValues::Enter));
 
-    Timer::deleteTimer(&TitleScreen::blinkPressEnterMsg);
-    Timer::deleteTimer(&TitleScreen::blinkChoiceArrow);
-    Timer::deleteTimer(&TitleScreen::changeTitleScreenColors);
+    Timer::clearAll();
 
     return startGameplay;
 }
@@ -215,8 +206,23 @@ void TitleScreen::changeTitleScreenColors()
 void TitleScreen::setsTitleScreenColors()
 {
     char colorCmd[10];
-    sprintf_s(colorCmd, "Color %x", TitleScreenBackColors[lastRandom]);
+    sprintf_s(colorCmd, "Color %x", titleScreenBackColors[lastRandom]);
 
     system(colorCmd);
     system(colorCmd); // Sometimes some borders remains in old color (bug?), then force color change.
+}
+
+void TitleScreen::blinkPressEnterMsg_callBack(void* ownerObject)
+{
+    reinterpret_cast<TitleScreen*>(ownerObject)->blinkPressEnterMsg();
+}
+
+void TitleScreen::blinkChoiceArrow_callBack(void* ownerObject)
+{
+    reinterpret_cast<TitleScreen*>(ownerObject)->blinkChoiceArrow();
+}
+
+void TitleScreen::changeTitleScreenColors_callBack(void* ownerObject)
+{
+    reinterpret_cast<TitleScreen*>(ownerObject)->changeTitleScreenColors();
 }

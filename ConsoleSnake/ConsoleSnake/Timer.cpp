@@ -10,8 +10,8 @@
 
 bool Timer::isRunning = false;
 std::chrono::high_resolution_clock::time_point Timer::previousTimePoint;
-std::vector<std::tuple<long, long>> Timer::timersCounter;
-std::vector<void (*)()> Timer::callbackMethods;
+std::vector<callbackAndTimersTuple> Timer::methodsAndTimersToAdd;
+std::vector<callbackAndTimersTuple> Timer::callbackMethodsAndTimers;
 
 Timer::Timer()
 {
@@ -28,9 +28,7 @@ bool Timer::run()
 {
 	using namespace std::chrono;
 
-	if (callbackMethods.size() != timersCounter.size() ||
-		callbackMethods.empty()||
-		timersCounter.empty())
+	if (methodsAndTimersToAdd.empty() && callbackMethodsAndTimers.empty())
 	{
 		isRunning = false;
 		return isRunning;
@@ -45,66 +43,80 @@ bool Timer::run()
 	{
 		auto msSpam = duration_cast<milliseconds>(high_resolution_clock::now() - previousTimePoint);
 
+		// DECREASES CURRENT TIMERS
 		if (msSpam.count() >= 1)
 		{
-			for (int i = 0; i < timersCounter.size(); i++) // same as callbackMethods.size()
-			{
-				long currentCounter = std::get<0>(timersCounter[i]);
+			previousTimePoint = std::chrono::high_resolution_clock::now();
 
-				if (--currentCounter > 0)
+			for (auto& tuple : callbackMethodsAndTimers)
+			{
+				if (std::get<4>(tuple) == true)
+					continue;
+
+				void* ownerObject = std::get<0>(tuple);
+				void (*methodPtr)(void*) = std::get<1>(tuple);
+				long& currentCounter = std::get<2>(tuple);
+				long& originalCounter = std::get<3>(tuple);
+
+				if (--currentCounter <= 0)
 				{
-					std::get<0>(timersCounter[i]) = currentCounter;
-				}
-				else
-				{
-					std::get<0>(timersCounter[i]) = std::get<1>(timersCounter[i]);
-					callbackMethods[i]();
+					currentCounter = originalCounter;
+					methodPtr(ownerObject);
 				}
 			}
+		}
 
-			previousTimePoint = std::chrono::high_resolution_clock::now();
+		// ADDS TIMERS
+		for (auto& tuple : methodsAndTimersToAdd)
+		{
+			callbackMethodsAndTimers.push_back(tuple);
+		}
+		methodsAndTimersToAdd.clear();
+
+		// DELETES FLAGGED TIMERS
+		// NOTE: The "std::remove_if" from "algorithm" library could be used.
+		for (size_t idx = callbackMethodsAndTimers.size(); idx > 0; idx--)
+		{
+			if (std::get<4>(callbackMethodsAndTimers[idx - 1]) == true)
+				callbackMethodsAndTimers.erase(callbackMethodsAndTimers.begin() + idx - 1);
 		}
 	}
 
 	return isRunning;
 }
 
-void Timer::setTimerAndCallback(long timerInMilliSeconds, void (*fcnPtr)())
+void Timer::setTimerAndCallback(long timerInMilliSeconds, void* ownerObject, void (*methodPtr)(void* ownerObject))
 {
-	if (fcnPtr != NULL)
+	// Change the timer if callback already exists.
+	for (auto& tuple : callbackMethodsAndTimers)
 	{
-		// Change the timer if callback already exists.
-		for (short indextToDelete = 0; indextToDelete < callbackMethods.size(); indextToDelete++)
+		if (std::get<1>(tuple) == methodPtr && !std::get<4>(tuple))
 		{
-			if (callbackMethods[indextToDelete] == fcnPtr)
-			{
-				std::get<1>(timersCounter[indextToDelete]) = timerInMilliSeconds;
-				return;
-			}
+			std::get<3>(tuple) = timerInMilliSeconds;
+			return;
 		}
+	}
 
-		callbackMethods.push_back(fcnPtr);
-		timersCounter.push_back(std::make_tuple(timerInMilliSeconds, timerInMilliSeconds));
+	if (methodPtr != NULL)
+	{
+		methodsAndTimersToAdd.push_back(std::make_tuple(ownerObject, methodPtr, timerInMilliSeconds, timerInMilliSeconds, false));
 	}
 }
 
-void Timer::deleteTimer(void (*fcnPtr)())
+void Timer::markTimerForDeletion(void (*methodPtr)(void* ownerObject))
 {
-	short indextToDelete;
-	bool hasTimerToDelete = false;
-
-	for (indextToDelete = 0; indextToDelete < callbackMethods.size(); indextToDelete++)
+	for (auto& tuple : callbackMethodsAndTimers)
 	{
-		if (callbackMethods[indextToDelete] == fcnPtr)
+		if (std::get<1>(tuple) == methodPtr)
 		{
-			hasTimerToDelete = true;
-			break;
+			std::get<4>(tuple) = true;
+			return;
 		}
 	}
+}
 
-	if (hasTimerToDelete)
-	{
-		callbackMethods.erase(callbackMethods.begin() + indextToDelete);
-		timersCounter.erase(timersCounter.begin() + indextToDelete);
-	}
+void Timer::clearAll()
+{
+	methodsAndTimersToAdd.clear();
+	callbackMethodsAndTimers.clear();
 }

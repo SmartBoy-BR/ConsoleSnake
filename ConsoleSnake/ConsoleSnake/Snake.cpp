@@ -15,18 +15,9 @@
 
 using std::cout;
 using std::endl;
-//using std::string;
 
-Point Snake::movementDirection;
-Point Snake::lastMovementDirection;
-BodyPiece Snake::head;
-//vector<BodyPiece> Snake::body;
-list<BodyPiece> Snake::body;
-BodyPiece Snake::tail;
-bool Snake::isGameOver;
-
-Snake::Snake()
-	: MoveUp({ 0, -1 }), MoveDown({ 0, 1 }), MoveLeft({ -2, 0 }), MoveRight({ 2, 0 }), BodyInitialAmount(9)
+Snake::Snake(UI& ref)
+	: refUi(ref),MoveUp({ 0, -1 }), MoveDown({ 0, 1 }), MoveLeft({ -2, 0 }), MoveRight({ 2, 0 }), BodyInitialAmount(9)
 {
 	isGameOver = false;
 }
@@ -66,70 +57,77 @@ void Snake::setupMovementBoundaries()
 
 bool Snake::runsGameplay()
 {
-    short key = 0;
+	short key = 0;
 
-	Timer::setTimerAndCallback(250, &Snake::movesTheSnake);
+	Timer::setTimerAndCallback(refUi.getSpeedPanelValue(), this, &Snake::movesTheSnake_callBack);
 
-    while (key != static_cast<short>(KeyValues::Enter) && !isGameOver)
-    {
-        Timer::run();
-
-        if (_kbhit())
-        {
-            key = _getch();
-
-            if (key == static_cast<short>(KeyValues::SpecialKey1) ||
-                key == static_cast<short>(KeyValues::SpecialKey2))
-            {
-                key = _getch(); // One more reading is needed to get the actual key pressed.
-            }
-
-            switch (key)
-            {
-				case 'w':
-				case 'W':
-				case static_cast<short>(KeyValues::ArrowUp):
-					if (lastMovementDirection != MoveDown) movementDirection = MoveUp;
-					break;
-
-				case 'a':
-				case 'A':
-				case static_cast<short>(KeyValues::ArrowLeft):
-					if (lastMovementDirection != MoveRight) movementDirection = MoveLeft;
-					break;
-
-				case 'd':
-				case 'D':
-				case static_cast<short>(KeyValues::ArrowRight):
-					if (lastMovementDirection != MoveLeft) movementDirection = MoveRight;
-					break;
-
-				case 's':
-				case 'S':
-				case static_cast<short>(KeyValues::ArrowDown):
-					if (lastMovementDirection != MoveUp) movementDirection = MoveDown;
-					break;
-
-				default:
-					break;
-            }
-        }
-
+	while (key != static_cast<short>(KeyValues::Enter) && !isGameOver)
+	{
 		Timer::run();
-    }
+		key = processesInputs();
+		Timer::run();
+	}
 
-	Timer::deleteTimer(&Snake::movesTheSnake);
+	Timer::markTimerForDeletion(&Snake::movesTheSnake_callBack);
 	body.clear();
 
-	UI::deleteUItimers();
+	refUi.deleteUItimers();
 	Sleep(1200);
 
 	return false;
 }
 
+int Snake::processesInputs()
+{
+	short key = 0;
+
+	if (_kbhit())
+	{
+		key = _getch();
+
+		if (key == static_cast<short>(KeyValues::SpecialKey1) ||
+			key == static_cast<short>(KeyValues::SpecialKey2))
+		{
+			key = _getch(); // One more reading is needed to get the actual key pressed.
+		}
+
+		switch (key)
+		{
+		case 'w':
+		case 'W':
+		case static_cast<short>(KeyValues::ArrowUp):
+			if (lastMovementDirection != MoveDown) movementDirection = MoveUp;
+			break;
+
+		case 'a':
+		case 'A':
+		case static_cast<short>(KeyValues::ArrowLeft):
+			if (lastMovementDirection != MoveRight) movementDirection = MoveLeft;
+			break;
+
+		case 'd':
+		case 'D':
+		case static_cast<short>(KeyValues::ArrowRight):
+			if (lastMovementDirection != MoveLeft) movementDirection = MoveRight;
+			break;
+
+		case 's':
+		case 'S':
+		case static_cast<short>(KeyValues::ArrowDown):
+			if (lastMovementDirection != MoveUp) movementDirection = MoveDown;
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	return key;
+}
+
 void Snake::createSnakeHead()
 {
-	// RANDOMLY POSITION THE "HEAD" ON THE MAP
+	// RANDOMLY POSITIONS THE "HEAD" ON THE MAP
 	const short xCoordLimit = static_cast<short>((endMovePosition.X() - startMovePosition.X()) * 0.5) + 1;
 	const short yCoordLimit = static_cast<short>(endMovePosition.Y() - startMovePosition.Y() + 1);
 	
@@ -142,20 +140,24 @@ void Snake::createSnakeHead()
 	head = BodyPiece(startMovePosition + Point(randomXcoord * 2, randomYcoord), '@');
 	head.printBodyPiece();
 
-	// DETERMINE THE DIRECTION OF THE SNAKE'S MOVEMENT
+	// DETERMINES THE DIRECTION OF THE SNAKE'S MOVEMENT
 	Point centerPosition = {
 		static_cast<int>((startMovePosition.X() + endMovePosition.X()) * 0.5),
 		static_cast<int>((startMovePosition.Y() + endMovePosition.Y()) * 0.5) };
 
 	movementDirection = centerPosition - head.getPosition();
 
-	if (abs(movementDirection.X()) > abs(movementDirection.Y())) movementDirection = { (movementDirection.X() / abs(movementDirection.X())) * 2, 0 };
-	else if (abs(movementDirection.Y()) > abs(movementDirection.X())) movementDirection = { 0, movementDirection.Y() / abs(movementDirection.Y()) };
+	if (abs(movementDirection.X()) > abs(movementDirection.Y()))
+		movementDirection = { (movementDirection.X() / abs(movementDirection.X())) * 2, 0 }; // {2,0} or {-2,0}
+	else if (abs(movementDirection.Y()) > abs(movementDirection.X()))
+		movementDirection = { 0, movementDirection.Y() / abs(movementDirection.Y()) }; // {0,1} or {0,-1}
 	else
 	{
 		// Choose direction in "x" or "y" randomly.
-		if (((rand() % 100) % 2) == 0) movementDirection = { (movementDirection.X() / abs(movementDirection.X())) * 2, 0 };
-		else movementDirection = { 0, movementDirection.Y() / abs(movementDirection.Y()) };
+		if (((rand() % 100) % 2) == 0)
+			movementDirection = { (movementDirection.X() / abs(movementDirection.X())) * 2, 0 }; // {2,0} or {-2,0}
+		else
+			movementDirection = { 0, movementDirection.Y() / abs(movementDirection.Y()) }; // {0,1} or {0,-1}
 	}
 
 	createSnakeBody();
@@ -163,7 +165,6 @@ void Snake::createSnakeHead()
 
 void Snake::createSnakeBody()
 {
-	// POSITIONS THE "BODY" FOLLOWING THE OPPOSITE MOVEMENT DIRECTION
 	Point oppositeMovementDirection = movementDirection * -1;
 	Point lastOppositeDirection = head.getPosition();
 
@@ -209,6 +210,7 @@ void Snake::createSnakeBody()
 		return hadCollision;
 	};
 
+	// POSITIONS THE "BODY" FOLLOWING THE OPPOSITE MOVEMENT DIRECTION
 	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightGreen);
 	for (short i = 0; i < BodyInitialAmount; i++)
 	{
@@ -224,6 +226,7 @@ void Snake::createSnakeBody()
 		//keyForDebugCaseTest = _getch();
 	}
 
+	// POSITIONS THE "TAIL"
 	do
 	{
 		lastOppositeDirection += oppositeMovementDirection;
@@ -260,24 +263,23 @@ void Snake::movesTheSnake()
 	// CHECK COLLISIONS WITH FOOD
 	gotSomeFood = (Game::getCursorPositionData(nextHeadPosition) == Food::FoodCharacter);
 
-	// PERFORMS TELETRANSPORT ACTION
-	if (nextHeadPosition == GridMap::getUpperPortalPosition()) head.setPosition(GridMap::getLowerPortalPosition());
-	else if (nextHeadPosition == GridMap::getLowerPortalPosition()) head.setPosition(GridMap::getUpperPortalPosition());
+	// PREPARES TELETRANSPORT ACTION
+	if (nextHeadPosition == GridMap::getUpperPortalPosition())
+		head.setPosition(GridMap::getLowerPortalPosition());
+	else if (nextHeadPosition == GridMap::getLowerPortalPosition())
+		head.setPosition(GridMap::getUpperPortalPosition());
 
-	// PERFORM THE MOVEMENT
+	// PERFORMS THE MOVEMENT
 	head.addToPosition(movementDirection);
 	lastMovementDirection = movementDirection;
+	processesInputs();
+
 	if (gotSomeFood)
 	{
-		UI::addScorePoints(100);
-		Timer::setTimerAndCallback(UI::getSpeedPanelValue(), &Snake::movesTheSnake);
+		refUi.addScorePoints(100);
+		
+		Timer::setTimerAndCallback(refUi.getSpeedPanelValue(), this, &Snake::movesTheSnake_callBack);
 	}
-
-	Point lastPiecePosition = body.back().getPosition();
-	body.push_front(body.back());
-	body.front().setPosition(lastPosition);
-	body.pop_back();
-	lastPosition = lastPiecePosition;
 
 	/*for (BodyPiece& bPiece : body) // loop all
 	{
@@ -285,26 +287,35 @@ void Snake::movesTheSnake()
 		bPiece.setPosition(lastPosition);
 		lastPosition = lastPiecePosition;
 	}*/
+	if (!body.empty())
+	{
+		Point lastPiecePosition = body.back().getPosition();
+		body.push_front(body.back());
+		body.front().setPosition(lastPosition);
+		body.pop_back();
+		lastPosition = lastPiecePosition;
+	}
+
 	tail.setPosition(lastPosition);
 	lastPosition = lastTailPosition;
 
-	// TURN OFF THE TIMER OR KEEP THE DEFAULT HEAD COLOR
+	// TURNS OFF THE TIMER OR KEEP THE DEFAULT HEAD COLOR
 	if (isGameOver)
 	{
-		Timer::deleteTimer(&Snake::movesTheSnake);
+		Timer::markTimerForDeletion(&Snake::movesTheSnake_callBack);
 	}
 	else
 	{
 		Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightAqua);
 	}
 
-	// PRINT THE NEW POSITIONS
+	// PRINTS THE NEW POSITIONS
 	if (!isGameOver) head.printBodyPiece();
 
-	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightGreen);
-	for (BodyPiece& bPiece : body)
+	if (!body.empty())
 	{
-		bPiece.printBodyPiece();
+		Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightGreen);
+		body.front().printBodyPiece();
 	}
 
 	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightYellow);
@@ -319,4 +330,9 @@ void Snake::movesTheSnake()
 
 		head.printBodyPiece();
 	}
+}
+
+void Snake::movesTheSnake_callBack(void* ownerObject)
+{
+	reinterpret_cast<Snake*>(ownerObject)->movesTheSnake();
 }

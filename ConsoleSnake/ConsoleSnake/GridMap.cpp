@@ -20,30 +20,36 @@ const char GridMap::BorderCharacter = '|';
 
 const int bordCol = 5; // ToDo Excluir após substituição
 
-GridMap::GridMap()
+GridMap::GridMap(UI& ref)
 {
+	snake = new Snake(ref);
 }
 
+GridMap::~GridMap()
+{
+	delete snake;
+	snake = NULL;
+}
 
 void GridMap::drawGrid()
 {
 	Point currentDrawPoint(Game::StartScreenPoint); //3,1
 	Point endDrawPoint(Game::EndScreenPoint); //111,32
 	
-	// ADJUSTS FOR GRID LIMITS
+	// ADJUSTS FOR THE GRID LIMITS
 	currentDrawPoint += {13, 7}; //16,8
 	endDrawPoint -= {13, 6}; //98,26
 
-	// PREPARE UPPER AND LOWER "PortalsPosition" FOR FURTHER RANDOM POSITIONING
+	// PREPARES UPPER AND LOWER "PortalsPositions" FOR FURTHER RANDOM POSITIONING
 	upperPortalPosition = currentDrawPoint;
 	lowerPortalPosition = endDrawPoint;
-	lowerPortalPosition += {-6, 0};
+	lowerPortalPosition -= {6, 0};
 
 	// SETS GRIDMAP COLOR
 	ConsoleColor borderColor = static_cast<ConsoleColor>(bordCol);
 	Game::setTextColors(borderColor, borderColor);
 
-	// DRAW THE ARENA EDGES
+	// DRAWS THE ARENA EDGES
 	Game::setCursorPosition(currentDrawPoint); // 16,8
 	short setW = endDrawPoint.X() - currentDrawPoint.X();
 	cout << BorderCharacter << setfill(BorderCharacter) << std::setw(setW) << BorderCharacter;
@@ -62,8 +68,25 @@ void GridMap::drawGrid()
 	Game::setCursorPosition(currentDrawPoint); // 16,26
 	cout << BorderCharacter << setfill(BorderCharacter) << std::setw(setW) << BorderCharacter;
 
-	// DRAW THE PORTALS IN RANDOM POSITIONS
+	// DRAWS THE PORTALS IN RANDOM POSITIONS
 	drawPortals();
+}
+
+int GridMap::run()
+{
+	bool keepPlaying = true;
+
+	if (snake != NULL)
+	{
+		snake->setupMovementBoundaries();
+
+		while (keepPlaying)
+		{
+			keepPlaying = snake->runsGameplay();
+		}
+	}
+
+	return BACKTOSTART;
 }
 
 bool GridMap::isPortalsEntrance(const Point& pointToCheck)
@@ -80,7 +103,7 @@ Point GridMap::getLowerPortalPosition() { return lowerPortalPosition; }
 
 void GridMap::drawPortals()
 {
-	// RANDOMLY POSITION THE PORTALS
+	// RANDOMLY POSITIONS THE PORTALS
 	const short xCoordLimit = static_cast<short>((lowerPortalPosition.X() - upperPortalPosition.X()) * 0.5) + 1;
 	short randomXcoord = 0;
 
@@ -108,7 +131,7 @@ void GridMap::drawPortals()
 	lowerPortalPosition += { 0, 1 };
 	printHalfPortal(lowerPortalPosition); // ?, 27
 
-	// PREPARE PORTALS ENTRY POSITIONS FOR GAMEPLAY
+	// PREPARES THE PORTALS ENTRY POSITIONS FOR GAMEPLAY
 	upperPortalPosition += { 3, 0 };
 	lowerPortalPosition += { 3, 0 };
 }

@@ -12,19 +12,23 @@
 class TitleScreen
 {
 	private:
-		static Point				playerChoiceArrow;
-		static bool					showEnterMessage;
-		static bool					showChoiceArrow;
-		static Point				blinkMsgPosition;
-		static std::vector<short>   TitleScreenBackColors;
-		static short                numberLimit;
-		static short                lastRandom;
+		Point				playerChoiceArrow;
+		bool				showEnterMessage;
+		bool				showChoiceArrow;
+		Point				blinkMsgPosition;
+		std::vector<short>	titleScreenBackColors;
+		short				numberLimit;
+		short				lastRandom;
+
+		static void blinkPressEnterMsg_callBack(void* ownerObject);
+		static void blinkChoiceArrow_callBack(void* ownerObject);
+		static void changeTitleScreenColors_callBack(void* ownerObject);
 
 		void drawTitleScreen();
-		static void blinkPressEnterMsg();
-		static void blinkChoiceArrow();
-		static void changeTitleScreenColors();
-		static void setsTitleScreenColors();
+		void blinkPressEnterMsg();
+		void blinkChoiceArrow();
+		void changeTitleScreenColors();
+		void setsTitleScreenColors();
 
 	public:
 		TitleScreen();
