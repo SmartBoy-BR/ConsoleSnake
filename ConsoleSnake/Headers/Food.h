@@ -15,6 +15,7 @@ class Food
 
 	public:
 		static const char	FoodCharacter;
+		static const short	PointsPerFood;
 
 		Food();
 };

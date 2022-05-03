@@ -66,13 +66,6 @@ bool Timer::run()
 			}
 		}
 
-		// ADDS TIMERS
-		for (auto& tuple : methodsAndTimersToAdd)
-		{
-			callbackMethodsAndTimers.push_back(tuple);
-		}
-		methodsAndTimersToAdd.clear();
-
 		// DELETES FLAGGED TIMERS
 		// NOTE: The "std::remove_if" from "algorithm" library could be used.
 		for (size_t idx = callbackMethodsAndTimers.size(); idx > 0; idx--)
@@ -80,6 +73,13 @@ bool Timer::run()
 			if (std::get<4>(callbackMethodsAndTimers[idx - 1]) == true)
 				callbackMethodsAndTimers.erase(callbackMethodsAndTimers.begin() + idx - 1);
 		}
+
+		// ADDS TIMERS
+		for (auto& tuple : methodsAndTimersToAdd)
+		{
+			callbackMethodsAndTimers.push_back(tuple);
+		}
+		methodsAndTimersToAdd.clear();
 	}
 
 	return isRunning;

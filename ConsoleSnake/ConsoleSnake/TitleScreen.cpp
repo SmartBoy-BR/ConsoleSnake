@@ -9,6 +9,7 @@
 #include <functional>
 #include <iomanip>
 #include "../Headers/TitleScreen.h"
+#include "../Headers/Stage.h"
 #include "../Headers/Timer.h"
 #include "../Headers/Game.h"
 
@@ -103,6 +104,11 @@ bool TitleScreen::waitingForPlayerChoice()
     return startGameplay;
 }
 
+short TitleScreen::getHexaColorsCode()
+{
+    return titleScreenBackColors[lastRandom];
+}
+
 void TitleScreen::drawTitleScreen()
 {
     system("cls");
@@ -119,9 +125,9 @@ void TitleScreen::drawTitleScreen()
     for (short yPos = currentDrawPoint.Y() + 1; yPos < endDrawPoint.Y(); yPos++)
     {
         Game::setCursorPosition(currentDrawPoint.X(), yPos);
-        cout << '|';
+        cout << Stage::BorderCharacter;
         Game::setCursorPosition(endDrawPoint.X(), yPos);
-        cout << '|';
+        cout << Stage::BorderCharacter;
     }
 
     Game::setCursorPosition(currentDrawPoint.X(), endDrawPoint.Y()); //3,32

@@ -11,9 +11,9 @@
 
 using std::cout;
 using std::endl;
-using std::string;
 
 const char Food::FoodCharacter = 'o';
+const short Food::PointsPerFood = 100;
 
 Food::Food()
 {

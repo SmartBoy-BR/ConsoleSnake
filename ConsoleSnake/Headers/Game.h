@@ -59,6 +59,7 @@ class Game
         static void setCursorPosition(SHORT x, SHORT y);
         static void setCursorPosition(const Point& cursorCoordinate);
         static char getCursorPositionData(const Point& cursorCoordinate);
+        static void setTextColors(short hexaColorsCode);
         static void setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor);
         void testColors();
 };

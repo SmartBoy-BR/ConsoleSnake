@@ -7,6 +7,8 @@
 #include <iostream>
 #include <iomanip>
 #include "../Headers/GridMap.h"
+#include "../Headers/Timer.h"
+#include "../Headers/Stage.h"
 #include "../Headers/Game.h"
 
 using std::cout;
@@ -16,7 +18,6 @@ using std::setfill;
 
 Point GridMap::upperPortalPosition;
 Point GridMap::lowerPortalPosition;
-const char GridMap::BorderCharacter = '|';
 
 const int bordCol = 5; // ToDo Excluir após substituição
 
@@ -28,7 +29,11 @@ GridMap::GridMap(UI& ref)
 GridMap::~GridMap()
 {
 	delete snake;
+	//delete startMovePosition;
+	//delete endMovePosition;
 	snake = NULL;
+	//startMovePosition = NULL;
+	//endMovePosition = NULL;
 }
 
 void GridMap::drawGrid()
@@ -52,21 +57,21 @@ void GridMap::drawGrid()
 	// DRAWS THE ARENA EDGES
 	Game::setCursorPosition(currentDrawPoint); // 16,8
 	short setW = endDrawPoint.X() - currentDrawPoint.X();
-	cout << BorderCharacter << setfill(BorderCharacter) << std::setw(setW) << BorderCharacter;
+	cout << Stage::BorderCharacter << setfill(Stage::BorderCharacter) << std::setw(setW) << Stage::BorderCharacter;
 
 	currentDrawPoint += {0, 1}; // 16,9
 
 	while (currentDrawPoint.Y() < endDrawPoint.Y())
 	{
 		Game::setCursorPosition(currentDrawPoint);
-		cout << std::setw(2) << BorderCharacter; // "setfill" is BorderCharacter
+		cout << std::setw(2) << Stage::BorderCharacter; // "setfill" is BorderCharacter
 		Game::setCursorPosition(endDrawPoint.X() - 1, currentDrawPoint.Y());
-		cout << std::setw(2) << BorderCharacter;
+		cout << std::setw(2) << Stage::BorderCharacter;
 		currentDrawPoint += {0, 1};
 	}
 
 	Game::setCursorPosition(currentDrawPoint); // 16,26
-	cout << BorderCharacter << setfill(BorderCharacter) << std::setw(setW) << BorderCharacter;
+	cout << Stage::BorderCharacter << setfill(Stage::BorderCharacter) << std::setw(setW) << Stage::BorderCharacter;
 
 	// DRAWS THE PORTALS IN RANDOM POSITIONS
 	drawPortals();
@@ -78,12 +83,17 @@ int GridMap::run()
 
 	if (snake != NULL)
 	{
-		snake->setupMovementBoundaries();
+		snake->setupMovementBoundaries(startMovePosition, endMovePosition);
+
+		// spawna frutas
 
 		while (keepPlaying)
 		{
-			keepPlaying = snake->runsGameplay();
+			keepPlaying = snake->processesGameplay();
+			Timer::run();
 		}
+
+		showGameOver();
 	}
 
 	return BACKTOSTART;
@@ -116,11 +126,11 @@ void GridMap::drawPortals()
 	{
 		Game::setCursorPosition(position);
 		Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Purple);
-		cout << std::setw(2) << BorderCharacter; // "setfill" is BorderCharacter.
+		cout << std::setw(2) << Stage::BorderCharacter; // "setfill" is BorderCharacter.
 		Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Purple);
 		cout << "   ";
 		Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Purple);
-		cout << std::setw(2) << BorderCharacter;
+		cout << std::setw(2) << Stage::BorderCharacter;
 	};
 
 	printHalfPortal(upperPortalPosition);// ?, 8
@@ -134,4 +144,34 @@ void GridMap::drawPortals()
 	// PREPARES THE PORTALS ENTRY POSITIONS FOR GAMEPLAY
 	upperPortalPosition += { 3, 0 };
 	lowerPortalPosition += { 3, 0 };
+}
+
+void GridMap::showGameOver()
+{
+	string gameOver = " GAME OVER ";
+	short setW = static_cast<short>(gameOver.length() + 1);
+	short halfGameOVerLength = static_cast<short>(1 + gameOver.length() * 0.5);
+
+	Point centerPosition = {
+		static_cast<int>((startMovePosition.X() + endMovePosition.X()) * 0.5),
+		static_cast<int>((startMovePosition.Y() + endMovePosition.Y()) * 0.5) };
+	
+	Point upperPosition = centerPosition - Point{ halfGameOVerLength, 1 };
+
+	Sleep(1000);
+
+	Game::setTextColors(Stage::getHexaColorsCode());
+
+	Game::setCursorPosition(upperPosition);
+	cout << '+' << std::setfill('-') << std::setw(setW) << '+';
+	upperPosition += { 0, 1 };
+
+	Game::setCursorPosition(upperPosition);
+	cout << Stage::BorderCharacter << gameOver << Stage::BorderCharacter;
+	upperPosition += { 0, 1 };
+
+	Game::setCursorPosition(upperPosition);
+	cout << '+' << std::setfill('-') << std::setw(setW) << '+';
+
+	Sleep(2500);
 }

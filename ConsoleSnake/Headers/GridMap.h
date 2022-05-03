@@ -14,14 +14,15 @@ class GridMap
 {
 	private:
 		Snake*			snake;
+		Point			startMovePosition;
+		Point			endMovePosition;
 		static Point	upperPortalPosition;
 		static Point	lowerPortalPosition;
 
 		void drawPortals();
+		void showGameOver();
 
 	public:
-		static const char	BorderCharacter;
-
 		GridMap(UI& ref);
 		~GridMap();
 		void drawGrid();

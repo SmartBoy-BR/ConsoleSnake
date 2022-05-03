@@ -8,24 +8,12 @@
 #include <iomanip>
 #include "../Headers/UI.h"
 #include "../Headers/Timer.h"
+#include "../Headers/Stage.h"
 #include "../Headers/Game.h"
 
 using std::cout;
 using std::endl;
 using std::string;
-
-/*bool UI::showScorePoints;
-bool UI::showHiScorePoints;
-bool UI::showSpeedValue;
-Point UI::scorePanelPosition;
-Point UI::hiScorePanelPosition;
-Point UI::snakeSpeedPanelPosition;
-unsigned short UI::scorePanelPoints;
-unsigned short UI::pointsToAdd;
-unsigned short UI::hiScorePanelPoints;
-unsigned short UI::snakeSpeedPanelValue;
-unsigned short UI::speedToDecrement;
-std::vector<void (*)(void*)> UI::blinkMethods;*/
 
 UI::UI()
 {
@@ -41,7 +29,7 @@ UI::UI()
 	scorePanelPoints = 0;
 	pointsToAdd = 0;
 	hiScorePanelPoints = Game::lastHiScorePoints;
-	snakeSpeedPanelValue = 250;
+	snakeSpeedPanelValue = 250; // min 40 ms
 	speedToDecrement = 0;
 }
 
@@ -59,11 +47,14 @@ void UI::addScorePoints(unsigned short morePoints)
 	blinkMethods.push_back(&UI::blinkScore_callBack);
 
 	if (hiScorePanelPoints < scorePanelPoints + pointsToAdd)
+	{
 		blinkMethods.push_back(&UI::blinkHiScore_callBack);
+		Game::lastHiScorePoints = scorePanelPoints + pointsToAdd;
+	}
 
 	if (((scorePanelPoints + pointsToAdd) % 300) == 0)
 	{
-		speedToDecrement = 25;
+		speedToDecrement = 35;
 		blinkMethods.push_back(&UI::blinkSpeedValue_callBack);
 	}
 
@@ -80,15 +71,14 @@ unsigned short UI::getSpeedPanelValue()
 
 void UI::deleteUItimers()
 {
-	/*Timer::markTimerForDeletion(&UI::prepareToStopBlinking_callBack);
+	Timer::markTimerForDeletion(&UI::prepareToStopBlinking_callBack);
 	Timer::markTimerForDeletion(&UI::stopBlinking_callBack);
 
 	for (auto method : blinkMethods)
 		Timer::markTimerForDeletion(method);
 
-	Timer::markTimerForDeletion(&UI::stopBlinking_callBack);*/
+	Timer::markTimerForDeletion(&UI::stopBlinking_callBack);
 	blinkMethods.clear();
-	Timer::clearAll();
 
 	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightGreen);
 	writeScore();
@@ -113,11 +103,11 @@ void UI::drawUI()
 
 	// DRAW THE PANEL BORDERS
 	Game::setCursorPosition(hiScorePanelPosition.X(), hiScorePanelPosition.Y() + 1); //32,4
-	cout << '|';
+	cout << Stage::BorderCharacter;
 	Game::setCursorPosition(snakeSpeedPanelPosition.X(), snakeSpeedPanelPosition.Y() + 1); //56,4
-	cout << '|';
+	cout << Stage::BorderCharacter;
 	Game::setCursorPosition(endDrawPoint.X(), endDrawPoint.Y() - 1); //105,4
-	cout << '|';
+	cout << Stage::BorderCharacter;
 
 	short setWscoreToHiScore = hiScorePanelPosition.X() - scorePanelPosition.X(); //23
 	short setWhiScoreToSnakePanel = snakeSpeedPanelPosition.X() - hiScorePanelPosition.X(); //24
@@ -138,11 +128,11 @@ void UI::drawUI()
 	hiScorePanelPosition += { 0, 1 };
 	snakeSpeedPanelPosition += { 0, 1 };
 	Game::setCursorPosition(scorePanelPosition); //11,4
-	cout << "| PLACAR: ";
+	cout << Stage::BorderCharacter << " PLACAR: ";
 	Game::setCursorPosition(hiScorePanelPosition); //34,4
-	cout << "| RECORDE: ";
+	cout << Stage::BorderCharacter << " RECORDE: ";
 	Game::setCursorPosition(snakeSpeedPanelPosition); //58,4
-	cout << "| TEMPO DE MOVIMENTAÇÃO: ";
+	cout << Stage::BorderCharacter << " TEMPO DE MOVIMENTAÇÃO: ";
 
 	scorePanelPosition += { 10, 0 };
 	hiScorePanelPosition += { 11, 0 };

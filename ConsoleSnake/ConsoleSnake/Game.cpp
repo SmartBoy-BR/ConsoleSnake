@@ -62,7 +62,7 @@ int Game::run()
 
                 if (ptrTitleScreen.waitingForPlayerChoice())
                 {
-                    ptrStage = new Stage();
+                    ptrStage = new Stage(ptrTitleScreen.getHexaColorsCode());
 
                     if (ptrStage == NULL)
                     {
@@ -112,9 +112,6 @@ void Game::setCursorPosition(SHORT x, SHORT y)
 
 void Game::setCursorPosition(const Point& cursorCoordinate)
 {
-    /*cursorCoord.X = cursorCoordinate.X();
-    cursorCoord.Y = cursorCoordinate.Y();
-    SetConsoleCursorPosition(handle, cursorCoord);*/
     setCursorPosition(cursorCoordinate.X(), cursorCoordinate.Y());
 }
 
@@ -132,12 +129,17 @@ char Game::getCursorPositionData(const Point& cursorCoordinate)
     return (total > 0) ? buffer : ' ';
 }
 
+void Game::setTextColors(short hexaColorsCode)
+{
+    SetConsoleTextAttribute(handle, hexaColorsCode);
+}
+
 void Game::setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor)
 {
     short backColor = static_cast<short>(backgroundColor);
     short textColor = static_cast<short>(foregroundColor);
 
-    SetConsoleTextAttribute(handle, (backColor << 4) | textColor);
+    setTextColors((backColor << 4) | textColor);
 }
 
 void Game::setupConsoleWindow()

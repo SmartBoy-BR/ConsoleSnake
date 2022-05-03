@@ -35,4 +35,5 @@ class TitleScreen
 		~TitleScreen();
 		int prepareTitleScreen();
 		bool waitingForPlayerChoice();
+		short getHexaColorsCode();
 };

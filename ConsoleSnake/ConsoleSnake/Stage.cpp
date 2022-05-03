@@ -8,16 +8,19 @@
 #include <iostream>
 #include <iomanip>
 #include "../Headers/Stage.h"
-#include "../Headers/Timer.h"
 #include "../Headers/Game.h"
 
 using std::cout;
 using std::endl;
 using std::string;
 
-Stage::Stage()
+short Stage::localHexaColorsCode;
+const char Stage::BorderCharacter = '|';
+
+Stage::Stage(short hexaColorsCode)
 {
 	gridMap = NULL;
+	localHexaColorsCode = hexaColorsCode;
 	playStates = PlayStates::Playing;
 }
 
@@ -41,6 +44,11 @@ int Stage::run()
 	}
 
 	return BACKTOSTART;
+}
+
+short Stage::getHexaColorsCode()
+{
+	return localHexaColorsCode;
 }
 
 void Stage::drawStageScreen()
@@ -69,7 +77,7 @@ void Stage::drawStageScreen()
 	while (currentDrawPoint.Y() < endDrawPoint.Y())
 	{
 		Game::setCursorPosition(currentDrawPoint);
-		cout << '|' << std::setfill(' ') << std::setw(setW) << '|';
+		cout << BorderCharacter << std::setfill(' ') << std::setw(setW) << BorderCharacter;
 		currentDrawPoint += {0, 1};
 	}
 

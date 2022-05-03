@@ -15,15 +15,18 @@ enum class PlayStates { Playing, GameOver, BackToStart };
 class Stage
 {
 	private:
-		UI			ui;
-		GridMap*	gridMap;
-		PlayStates	playStates;
+		UI				ui;
+		GridMap*		gridMap;
+		PlayStates		playStates;
+		static short	localHexaColorsCode;
 
 		void drawStageScreen();
-		//static void blinkGetReadyMsg();
 
 	public:
-		Stage();
+		static const char BorderCharacter;
+
+		Stage(short hexaColorsCode);
 		~Stage();
 		int run();
+		static short getHexaColorsCode();
 };
