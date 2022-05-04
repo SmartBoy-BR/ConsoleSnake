@@ -24,6 +24,6 @@ class Timer
     public:
         static bool run();
         static void setTimerAndCallback(long timerInMilliSeconds, void* ownerObject, void (*methodPtr)(void* ownerObject));
-        static void markTimerForDeletion(void (*methodPtr)(void* ownerObject));
+        static void markTimerForDeletion(void* ownerObject, void (*methodPtr)(void* ownerObject));
         static void clearAll();
 };

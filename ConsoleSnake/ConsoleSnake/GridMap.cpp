@@ -10,6 +10,7 @@
 #include "../Headers/Timer.h"
 #include "../Headers/Stage.h"
 #include "../Headers/Game.h"
+#include "../Headers/Food.h"
 
 using std::cout;
 using std::endl;
@@ -85,15 +86,16 @@ int GridMap::run()
 	{
 		snake->setupMovementBoundaries(startMovePosition, endMovePosition);
 
-		// spawna frutas
+		Food::startFoodSpawner();
 
 		while (keepPlaying)
 		{
-			keepPlaying = snake->processesGameplay();
 			Timer::run();
+			keepPlaying = snake->processesGameplay();
 		}
 
 		showGameOver();
+		Timer::clearAll();
 	}
 
 	return BACKTOSTART;
@@ -148,9 +150,9 @@ void GridMap::drawPortals()
 
 void GridMap::showGameOver()
 {
-	string gameOver = " GAME OVER ";
-	short setW = static_cast<short>(gameOver.length() + 1);
-	short halfGameOVerLength = static_cast<short>(1 + gameOver.length() * 0.5);
+	string gameOver = " | FIM DE JOGO | ";
+	short setW = static_cast<short>(gameOver.length() - 2);
+	short halfGameOVerLength = static_cast<short>(gameOver.length() * 0.5);
 
 	Point centerPosition = {
 		static_cast<int>((startMovePosition.X() + endMovePosition.X()) * 0.5),
@@ -160,18 +162,18 @@ void GridMap::showGameOver()
 
 	Sleep(1000);
 
-	Game::setTextColors(Stage::getHexaColorsCode());
+	Game::backToTitleScreenColors();
 
 	Game::setCursorPosition(upperPosition);
-	cout << '+' << std::setfill('-') << std::setw(setW) << '+';
+	cout << " +" << std::setfill('-') << std::setw(setW) << "+ ";
 	upperPosition += { 0, 1 };
 
 	Game::setCursorPosition(upperPosition);
-	cout << Stage::BorderCharacter << gameOver << Stage::BorderCharacter;
+	cout << gameOver;
 	upperPosition += { 0, 1 };
 
 	Game::setCursorPosition(upperPosition);
-	cout << '+' << std::setfill('-') << std::setw(setW) << '+';
+	cout << " +" << std::setfill('-') << std::setw(setW) << "+ ";
 
 	Sleep(2500);
 }

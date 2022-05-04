@@ -16,6 +16,7 @@ using std::string;
 
 HANDLE Game::handle;
 COORD Game::cursorCoord;
+short Game::lastTitleScreenHexaColors;
 unsigned short Game::lastHiScorePoints;
 const Point Game::StartScreenPoint = { 3, 1 };
 const Point Game::EndScreenPoint = {
@@ -62,7 +63,9 @@ int Game::run()
 
                 if (ptrTitleScreen.waitingForPlayerChoice())
                 {
-                    ptrStage = new Stage(ptrTitleScreen.getHexaColorsCode());
+                    lastTitleScreenHexaColors = ptrTitleScreen.getHexaColorsCode();
+
+                    ptrStage = new Stage();
 
                     if (ptrStage == NULL)
                     {
@@ -129,17 +132,17 @@ char Game::getCursorPositionData(const Point& cursorCoordinate)
     return (total > 0) ? buffer : ' ';
 }
 
-void Game::setTextColors(short hexaColorsCode)
-{
-    SetConsoleTextAttribute(handle, hexaColorsCode);
-}
-
 void Game::setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor)
 {
     short backColor = static_cast<short>(backgroundColor);
     short textColor = static_cast<short>(foregroundColor);
 
-    setTextColors((backColor << 4) | textColor);
+    setConsoleColorsAttribute((backColor << 4) | textColor);
+}
+
+void Game::backToTitleScreenColors()
+{
+    setConsoleColorsAttribute(lastTitleScreenHexaColors);
 }
 
 void Game::setupConsoleWindow()
@@ -179,6 +182,11 @@ void Game::prepareToCloseWindow()
 
     system("Color 7");
     system("cls");
+}
+
+void Game::setConsoleColorsAttribute(short hexaColorsCode)
+{
+    SetConsoleTextAttribute(handle, hexaColorsCode);
 }
 
 void Game::testColors()

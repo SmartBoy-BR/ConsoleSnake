@@ -18,15 +18,13 @@ class Stage
 		UI				ui;
 		GridMap*		gridMap;
 		PlayStates		playStates;
-		static short	localHexaColorsCode;
 
 		void drawStageScreen();
 
 	public:
 		static const char BorderCharacter;
 
-		Stage(short hexaColorsCode);
+		Stage();
 		~Stage();
 		int run();
-		static short getHexaColorsCode();
 };

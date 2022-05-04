@@ -33,6 +33,7 @@ class Snake
 		bool				isGameOver;
 
 		static void movesTheSnake_callBack(void* ownerObject);
+		static void processesInputs_callBack(void* ownerObject);
 
 		int processesInputs();
 		void createSnakeHead();

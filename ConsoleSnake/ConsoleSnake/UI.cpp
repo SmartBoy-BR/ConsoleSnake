@@ -2,6 +2,7 @@
  * CREATED DATE:    2022-Apr-20
  *
  * FUNCTION: Source file with the implementations for drawing and managing the user interface.
+ * NOTE: Each panel can be an object of a class to better separate tasks.
  */
 
 #include <iostream>
@@ -71,13 +72,13 @@ unsigned short UI::getSpeedPanelValue()
 
 void UI::deleteUItimers()
 {
-	Timer::markTimerForDeletion(&UI::prepareToStopBlinking_callBack);
-	Timer::markTimerForDeletion(&UI::stopBlinking_callBack);
+	Timer::markTimerForDeletion(this, &UI::prepareToStopBlinking_callBack);
+	Timer::markTimerForDeletion(this, &UI::stopBlinking_callBack);
 
 	for (auto method : blinkMethods)
-		Timer::markTimerForDeletion(method);
+		Timer::markTimerForDeletion(this, method);
 
-	Timer::markTimerForDeletion(&UI::stopBlinking_callBack);
+	Timer::markTimerForDeletion(this, &UI::stopBlinking_callBack);
 	blinkMethods.clear();
 
 	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightGreen);
@@ -218,15 +219,15 @@ void UI::prepareToStopBlinking()
 	for (auto method : blinkMethods)
 		Timer::setTimerAndCallback(200, this, method);
 	
-	Timer::markTimerForDeletion(&UI::prepareToStopBlinking_callBack);
+	Timer::markTimerForDeletion(this, &UI::prepareToStopBlinking_callBack);
 }
 
 void UI::stopBlinking()
 {
 	for (auto method : blinkMethods)
-		Timer::markTimerForDeletion(method);
+		Timer::markTimerForDeletion(this, method);
 	
-	Timer::markTimerForDeletion(&UI::stopBlinking_callBack);
+	Timer::markTimerForDeletion(this, &UI::stopBlinking_callBack);
 
 	showScorePoints = false;
 	showHiScorePoints = false;

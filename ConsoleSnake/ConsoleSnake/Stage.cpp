@@ -14,13 +14,11 @@ using std::cout;
 using std::endl;
 using std::string;
 
-short Stage::localHexaColorsCode;
 const char Stage::BorderCharacter = '|';
 
-Stage::Stage(short hexaColorsCode)
+Stage::Stage()
 {
 	gridMap = NULL;
-	localHexaColorsCode = hexaColorsCode;
 	playStates = PlayStates::Playing;
 }
 
@@ -44,11 +42,6 @@ int Stage::run()
 	}
 
 	return BACKTOSTART;
-}
-
-short Stage::getHexaColorsCode()
-{
-	return localHexaColorsCode;
 }
 
 void Stage::drawStageScreen()

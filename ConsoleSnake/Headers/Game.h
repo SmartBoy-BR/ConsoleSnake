@@ -44,9 +44,11 @@ class Game
         CONSOLE_CURSOR_INFO     *ccInfo;
         HWND                    consoleWindow;
         long                    windowLong;
+        static short	        lastTitleScreenHexaColors;
 
         void setupConsoleWindow();
         void prepareToCloseWindow();
+        static void setConsoleColorsAttribute(short hexaColorsCode);
 
     public:
         static unsigned short	lastHiScorePoints;
@@ -59,7 +61,7 @@ class Game
         static void setCursorPosition(SHORT x, SHORT y);
         static void setCursorPosition(const Point& cursorCoordinate);
         static char getCursorPositionData(const Point& cursorCoordinate);
-        static void setTextColors(short hexaColorsCode);
         static void setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor);
+        static void backToTitleScreenColors();
         void testColors();
 };

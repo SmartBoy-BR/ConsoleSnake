@@ -2,6 +2,7 @@
  * CREATED DATE:    2022-Apr-16
  *
  * FUNCTION: Timer source file with the implementations that establish the control of the game's time bases.
+ * NOTE: This class can be changed to work independently on a thread.
  */
 
 #include <iostream>
@@ -90,7 +91,9 @@ void Timer::setTimerAndCallback(long timerInMilliSeconds, void* ownerObject, voi
 	// Change the timer if callback already exists.
 	for (auto& tuple : callbackMethodsAndTimers)
 	{
-		if (std::get<1>(tuple) == methodPtr && !std::get<4>(tuple))
+		if (std::get<0>(tuple) == ownerObject &&
+			std::get<1>(tuple) == methodPtr &&
+			std::get<4>(tuple) == false)
 		{
 			std::get<3>(tuple) = timerInMilliSeconds;
 			return;
@@ -103,11 +106,12 @@ void Timer::setTimerAndCallback(long timerInMilliSeconds, void* ownerObject, voi
 	}
 }
 
-void Timer::markTimerForDeletion(void (*methodPtr)(void* ownerObject))
+void Timer::markTimerForDeletion(void* ownerObject, void (*methodPtr)(void* ownerObject))
 {
 	for (auto& tuple : callbackMethodsAndTimers)
 	{
-		if (std::get<1>(tuple) == methodPtr)
+		if (std::get<0>(tuple) == ownerObject &&
+			std::get<1>(tuple) == methodPtr)
 		{
 			std::get<4>(tuple) = true;
 			return;

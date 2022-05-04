@@ -18,7 +18,7 @@ using std::cout;
 using std::endl;
 
 Snake::Snake(UI& ref)
-	: refUi(ref),MoveUp({ 0, -1 }), MoveDown({ 0, 1 }), MoveLeft({ -2, 0 }), MoveRight({ 2, 0 }), BodyInitialAmount(0)
+	: refUi(ref), MoveUp({ 0, -1 }), MoveDown({ 0, 1 }), MoveLeft({ -2, 0 }), MoveRight({ 2, 0 }), BodyInitialAmount(0)
 {
 	isGameOver = false;
 }
@@ -36,7 +36,7 @@ void Snake::setupMovementBoundaries(Point& refStartPosition, Point& refEndPositi
 	refEndPosition = Point(endMovePosition);
 
 	createSnakeHead();
-	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Yellow);
+	/*Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Yellow);
 	Game::setCursorPosition(Point(21, 10));
 	cout << Food::FoodCharacter;
 	Game::setCursorPosition(Point(19, 21));
@@ -56,21 +56,20 @@ void Snake::setupMovementBoundaries(Point& refStartPosition, Point& refEndPositi
 	Game::setCursorPosition(Point(93, 25));
 	cout << Food::FoodCharacter;
 	Game::setCursorPosition(Point(95, 13));
-	cout << Food::FoodCharacter;
+	cout << Food::FoodCharacter;*/
 
+	Timer::setTimerAndCallback(50, this, &Snake::processesInputs_callBack);
 	Timer::setTimerAndCallback(refUi.getSpeedPanelValue(), this, &Snake::movesTheSnake_callBack);
 }
 
 bool Snake::processesGameplay()
 {
-	short key = 0;
-
 	Timer::run();
-	key = processesInputs();
 
 	if (isGameOver)
 	{
-		Timer::markTimerForDeletion(&Snake::movesTheSnake_callBack);
+		Timer::markTimerForDeletion(this, &Snake::processesInputs_callBack);
+		Timer::markTimerForDeletion(this, &Snake::movesTheSnake_callBack);
 		refUi.deleteUItimers();
 		body.clear();
 	}
@@ -254,6 +253,7 @@ void Snake::movesTheSnake()
 	{
 		refUi.addScorePoints(Food::PointsPerFood);
 		Timer::setTimerAndCallback(refUi.getSpeedPanelValue(), this, &Snake::movesTheSnake_callBack);
+		Food::deleteFoodOnGridMap(nextHeadPosition);
 	}
 
 	// PREPARES TELETRANSPORT ACTION
@@ -348,7 +348,7 @@ void Snake::printTheBodyWhenMoving(const Point& refLastPosition, const bool& ref
 
 	if (isGameOver)
 	{
-		Timer::markTimerForDeletion(&Snake::movesTheSnake_callBack);
+		Timer::markTimerForDeletion(this, &Snake::movesTheSnake_callBack);
 
 		if (refGridMapCollisionFlag)
 			Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightRed);
@@ -362,4 +362,9 @@ void Snake::printTheBodyWhenMoving(const Point& refLastPosition, const bool& ref
 void Snake::movesTheSnake_callBack(void* ownerObject)
 {
 	reinterpret_cast<Snake*>(ownerObject)->movesTheSnake();
+}
+
+void Snake::processesInputs_callBack(void* ownerObject)
+{
+	reinterpret_cast<Snake*>(ownerObject)->processesInputs();
 }

@@ -6,16 +6,31 @@
 
 #pragma once
 
+#include <vector>
 #include "../Headers/Point.h"
 
 class Food
 {
 	private:
-		Point	gridPosition;
+		const Point					GridPosition;
+		const unsigned char			RemainingTimeToStartBlinking;
+		unsigned char				lifeTimeInSeconds;
+		bool						showFoodOnGridMap;
+		static std::vector<Food*>	foodsOnGridMap;
+
+		static void decreaseLifeTime_callBack(void* ownerObject);
+		static void blinkFoodOnGridMap_callBack(void* ownerObject);
+
+		void writeFoodCharacter();
+		void decreaseLifeTime();
+		void blinkFoodOnGridMap();
 
 	public:
+		Food(Point& spawnPos, unsigned char lifeTimeInSecs);
 		static const char	FoodCharacter;
 		static const short	PointsPerFood;
 
-		Food();
+		static void startFoodSpawner();
+		static void deleteFoodOnGridMap(Point gridPosition);
+
 };
