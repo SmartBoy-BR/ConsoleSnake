@@ -36,30 +36,9 @@ void Snake::setupMovementBoundaries(Point& refStartPosition, Point& refEndPositi
 	refEndPosition = Point(endMovePosition);
 
 	createSnakeHead();
-	/*Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Yellow);
-	Game::setCursorPosition(Point(21, 10));
-	cout << Food::FoodCharacter;
-	Game::setCursorPosition(Point(19, 21));
-	cout << Food::FoodCharacter;
-	Game::setCursorPosition(Point(25, 14));
-	cout << Food::FoodCharacter;
-	Game::setCursorPosition(Point(57, 17));
-	cout << Food::FoodCharacter;
-	Game::setCursorPosition(Point(65, 9));
-	cout << Food::FoodCharacter;
-	Game::setCursorPosition(Point(79, 9));
-	cout << Food::FoodCharacter;
-	Game::setCursorPosition(Point(91, 24));
-	cout << Food::FoodCharacter;
-	Game::setCursorPosition(Point(93, 20));
-	cout << Food::FoodCharacter;
-	Game::setCursorPosition(Point(93, 25));
-	cout << Food::FoodCharacter;
-	Game::setCursorPosition(Point(95, 13));
-	cout << Food::FoodCharacter;*/
 
-	Timer::setTimerAndCallback(50, this, &Snake::processesInputs_callBack);
-	Timer::setTimerAndCallback(refUi.getSpeedPanelValue(), this, &Snake::movesTheSnake_callBack);
+	Timer::setTimerAndCallback(static_cast<short>(refUi.MinimumTimeSpeed / 3), this, &Snake::processesInputs_callBack);
+	Timer::setTimerAndCallback(refUi.getNextSpeedPanelValue(), this, &Snake::movesTheSnake_callBack);
 }
 
 bool Snake::processesGameplay()
@@ -76,6 +55,8 @@ bool Snake::processesGameplay()
 
 	return !isGameOver;
 }
+
+Point Snake::getSnakeHeadPosition() { return head.getPosition(); }
 
 int Snake::processesInputs()
 {
@@ -252,8 +233,8 @@ void Snake::movesTheSnake()
 	if (gotSomeFood)
 	{
 		refUi.addScorePoints(Food::PointsPerFood);
-		Timer::setTimerAndCallback(refUi.getSpeedPanelValue(), this, &Snake::movesTheSnake_callBack);
 		Food::deleteFoodOnGridMap(nextHeadPosition);
+		Timer::setTimerAndCallback(refUi.getNextSpeedPanelValue(), this, &Snake::movesTheSnake_callBack);
 	}
 
 	// PREPARES TELETRANSPORT ACTION
@@ -265,7 +246,6 @@ void Snake::movesTheSnake()
 	// PERFORMS THE MOVEMENT
 	head.addToPosition(movementDirection);
 	lastMovementDirection = movementDirection;
-	processesInputs();
 
 	if (!body.empty())
 	{

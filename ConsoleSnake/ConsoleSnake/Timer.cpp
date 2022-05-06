@@ -61,8 +61,8 @@ bool Timer::run()
 
 				if (--currentCounter <= 0)
 				{
-					currentCounter = originalCounter;
 					methodPtr(ownerObject);
+					currentCounter = originalCounter;
 				}
 			}
 		}
@@ -92,10 +92,10 @@ void Timer::setTimerAndCallback(long timerInMilliSeconds, void* ownerObject, voi
 	for (auto& tuple : callbackMethodsAndTimers)
 	{
 		if (std::get<0>(tuple) == ownerObject &&
-			std::get<1>(tuple) == methodPtr &&
-			std::get<4>(tuple) == false)
+			std::get<1>(tuple) == methodPtr)
 		{
 			std::get<3>(tuple) = timerInMilliSeconds;
+			std::get<4>(tuple) = false;
 			return;
 		}
 	}

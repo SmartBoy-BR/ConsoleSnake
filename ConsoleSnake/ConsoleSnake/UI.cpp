@@ -17,6 +17,7 @@ using std::endl;
 using std::string;
 
 UI::UI()
+	: PointsToIncreaseSpeed(300), StartTimeSpeed(260), MinimumTimeSpeed(38)
 {
 	showScorePoints = false;
 	showHiScorePoints = false;
@@ -30,8 +31,8 @@ UI::UI()
 	scorePanelPoints = 0;
 	pointsToAdd = 0;
 	hiScorePanelPoints = Game::lastHiScorePoints;
-	snakeSpeedPanelValue = 250; // min 40 ms
-	speedToDecrement = 0;
+	snakeSpeedPanelValue = StartTimeSpeed;
+	nextSnakeSpeedValue = snakeSpeedPanelValue;
 }
 
 void UI::setupUI()
@@ -53,10 +54,15 @@ void UI::addScorePoints(unsigned short morePoints)
 		Game::lastHiScorePoints = scorePanelPoints + pointsToAdd;
 	}
 
-	if (((scorePanelPoints + pointsToAdd) % 300) == 0)
+	if (nextSnakeSpeedValue > MinimumTimeSpeed &&
+		((scorePanelPoints + pointsToAdd) % PointsToIncreaseSpeed) == 0)
 	{
-		speedToDecrement = 35;
-		blinkMethods.push_back(&UI::blinkSpeedValue_callBack);
+		setNextSpeedPanelValue();
+
+		if (nextSnakeSpeedValue == MinimumTimeSpeed)
+			Timer::setTimerAndCallback(200, this, &UI::blinkSpeedValue_callBack);
+		else
+			blinkMethods.push_back(&UI::blinkSpeedValue_callBack);
 	}
 
 	Timer::setTimerAndCallback(1000, this, &UI::prepareToStopBlinking_callBack);
@@ -65,9 +71,9 @@ void UI::addScorePoints(unsigned short morePoints)
 		Timer::setTimerAndCallback(100, this, method);
 }
 
-unsigned short UI::getSpeedPanelValue()
+unsigned short UI::getNextSpeedPanelValue()
 {
-	return snakeSpeedPanelValue;
+	return nextSnakeSpeedValue;
 }
 
 void UI::deleteUItimers()
@@ -78,7 +84,6 @@ void UI::deleteUItimers()
 	for (auto method : blinkMethods)
 		Timer::markTimerForDeletion(this, method);
 
-	Timer::markTimerForDeletion(this, &UI::stopBlinking_callBack);
 	blinkMethods.clear();
 
 	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightGreen);
@@ -87,6 +92,25 @@ void UI::deleteUItimers()
 	writeHiScore();
 	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Yellow);
 	writeSpeedValue();
+}
+
+void UI::setNextSpeedPanelValue()
+{
+	if (nextSnakeSpeedValue <= MinimumTimeSpeed)
+	{
+		nextSnakeSpeedValue = MinimumTimeSpeed;
+		return;
+	}
+
+	// Some logic to change and limit the speed.
+	if (nextSnakeSpeedValue > StartTimeSpeed - 35 - 35) nextSnakeSpeedValue = nextSnakeSpeedValue - 35; //> 190
+	else if (nextSnakeSpeedValue > StartTimeSpeed - 70 - 30 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 30; //> 130
+	else if (nextSnakeSpeedValue > StartTimeSpeed - 130 - 20 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 20; //> 90
+	else if (nextSnakeSpeedValue > StartTimeSpeed - 170 - 10 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 10; //> 70
+	else if (nextSnakeSpeedValue > StartTimeSpeed - 190 - 7 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 7; //> 56
+	else if (nextSnakeSpeedValue > StartTimeSpeed - 204 - 5 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 5; //> 46
+	else if (nextSnakeSpeedValue > StartTimeSpeed - 214 - 3 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 3; //> 40
+	else if (nextSnakeSpeedValue > StartTimeSpeed - 220 - 1 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 1; //> 38
 }
 
 void UI::drawUI()
@@ -211,8 +235,7 @@ void UI::prepareToStopBlinking()
 	if (hiScorePanelPoints < scorePanelPoints)
 		hiScorePanelPoints = scorePanelPoints;
 
-	snakeSpeedPanelValue -= speedToDecrement;
-	speedToDecrement = 0;
+	snakeSpeedPanelValue = nextSnakeSpeedValue;
 	
 	Timer::setTimerAndCallback(1000, this, &UI::stopBlinking_callBack);
 	

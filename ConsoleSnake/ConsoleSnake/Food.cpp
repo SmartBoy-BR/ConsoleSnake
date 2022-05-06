@@ -13,11 +13,14 @@ using std::cout;
 using std::endl;
 
 std::vector<Food*> Food::foodsOnGridMap;
+Point Food::startMovePosition;
+Point Food::endMovePosition;
+//Point Food::(Snake::* snakeHeadPosMethodPtr)();
 const char Food::FoodCharacter = 'o';
 const short Food::PointsPerFood = 100;
 
 Food::Food(Point& spawnPos, unsigned char lifeTimeInSecs)
-	: GridPosition(spawnPos), RemainingTimeToStartBlinking(3)
+	: GridPosition(spawnPos), RemainingTimeToStartBlinking(3), MinSqrDistanceToSnakeHead(32)
 {
 	lifeTimeInSeconds = lifeTimeInSecs;
 	showFoodOnGridMap = true;
@@ -28,13 +31,15 @@ Food::Food(Point& spawnPos, unsigned char lifeTimeInSecs)
 	Timer::setTimerAndCallback(1000, this, &decreaseLifeTime_callBack);
 }
 
-void Food::startFoodSpawner()
+void Food::startFoodSpawner(Point& startPos, Point& endPos)
 {
-
-
-	foodsOnGridMap.push_back(new Food(Point{ 19, 9 }, 10));
-	foodsOnGridMap.push_back(new Food(Point{ 23, 13 }, 7));
+	startMovePosition = startPos;
+	endMovePosition = endPos;
+	Timer::setTimerAndCallback(((rand() % 3) + 2) * 1000, // 0 to 2 plus 2 => (2..4) * 1000
+		NULL, &runFoodSpawner);
 }
+
+void Food::stopFoodSpawner() { Timer::markTimerForDeletion(NULL, &runFoodSpawner); }
 
 void Food::deleteFoodOnGridMap(Point gridPosition)
 {
@@ -89,6 +94,31 @@ void Food::blinkFoodOnGridMap()
 		Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Gray);
 
 	writeFoodCharacter();
+}
+
+void Food::runFoodSpawner(void* nullObj)
+{
+	Point newFoodPosition;
+	
+	do
+	{
+		newFoodPosition = startMovePosition;
+
+		const short xCoordLimit = static_cast<short>((endMovePosition.X() - startMovePosition.X()) * 0.5) + 1;
+		const short yCoordLimit = static_cast<short>(endMovePosition.Y() - startMovePosition.Y() + 1);
+
+		short randomXcoord, randomYcoord;
+
+		randomXcoord = (rand() % xCoordLimit);
+		randomYcoord = (rand() % yCoordLimit);
+
+		newFoodPosition += { randomXcoord * 2, randomYcoord };
+	
+	} while (Game::getCursorPositionData(newFoodPosition) != ' ');
+
+	foodsOnGridMap.push_back(new Food(newFoodPosition, (rand() % 6) + 7)); // 0 to 5 plus 7 => (7..12)
+	Timer::setTimerAndCallback(((rand() % 7) + 2) * 1000, // 0 to 6 plus 2 => (2..8) * 1000
+		NULL, &runFoodSpawner);
 }
 
 void Food::decreaseLifeTime_callBack(void* ownerObject)

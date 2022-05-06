@@ -17,6 +17,8 @@ using std::endl;
 using std::string;
 using std::setfill;
 
+Point GridMap::startMovePosition;
+Point GridMap::endMovePosition;
 Point GridMap::upperPortalPosition;
 Point GridMap::lowerPortalPosition;
 
@@ -86,7 +88,7 @@ int GridMap::run()
 	{
 		snake->setupMovementBoundaries(startMovePosition, endMovePosition);
 
-		Food::startFoodSpawner();
+		Food::startFoodSpawner(startMovePosition, endMovePosition);
 
 		while (keepPlaying)
 		{
@@ -95,6 +97,7 @@ int GridMap::run()
 		}
 
 		showGameOver();
+		Food::stopFoodSpawner();
 		Timer::clearAll();
 	}
 
@@ -110,8 +113,9 @@ bool GridMap::isPortalsEntrance(const Point& pointToCheck)
 }
 
 Point GridMap::getUpperPortalPosition() { return upperPortalPosition; }
-
 Point GridMap::getLowerPortalPosition() { return lowerPortalPosition; }
+Point GridMap::getStartMovePosition() { return startMovePosition; }
+Point GridMap::getEndMovePosition() { return endMovePosition; }
 
 void GridMap::drawPortals()
 {

@@ -14,8 +14,8 @@ class GridMap
 {
 	private:
 		Snake*			snake;
-		Point			startMovePosition;
-		Point			endMovePosition;
+		static Point	startMovePosition;
+		static Point	endMovePosition;
 		static Point	upperPortalPosition;
 		static Point	lowerPortalPosition;
 
@@ -30,4 +30,6 @@ class GridMap
 		static bool isPortalsEntrance(const Point& pointToCheck);
 		static Point getUpperPortalPosition();
 		static Point getLowerPortalPosition();
+		static Point getStartMovePosition();
+		static Point getEndMovePosition();
 };

@@ -49,7 +49,7 @@ bool TitleScreen::waitingForPlayerChoice()
     short key = 0;
     bool startGameplay = true;
 
-    do
+    while (key != static_cast<short>(KeyValues::Enter))
     {
         Timer::run();
 
@@ -97,7 +97,7 @@ bool TitleScreen::waitingForPlayerChoice()
                     break;
             }
         }
-    } while (key != static_cast<short>(KeyValues::Enter));
+    }
 
     Timer::clearAll();
 

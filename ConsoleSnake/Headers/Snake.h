@@ -46,4 +46,5 @@ class Snake
 		Snake(UI& ref);
 		void setupMovementBoundaries(Point& refStartPosition, Point& refEndPosition);
 		bool processesGameplay();
+		Point getSnakeHeadPosition();
 };
