@@ -30,7 +30,7 @@ Game::Game()
     gameStates = GameStates::TitleScreen;
     handle = GetStdHandle(STD_OUTPUT_HANDLE);
     cursorCoord = { 0, 0 };
-    lastHiScorePoints = 100;
+    lastHiScorePoints = 2468;
     ccInfo = new CONSOLE_CURSOR_INFO();
     consoleWindow = NULL;
     windowLong = 0;
