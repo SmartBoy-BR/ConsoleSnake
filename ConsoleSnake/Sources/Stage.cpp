@@ -4,22 +4,20 @@
  * FUNCTION: Game level source file with implementations of global gameplay pre-management systems.
  */
 
-#include <conio.h>
 #include <iostream>
 #include <iomanip>
 #include "../Headers/Stage.h"
 #include "../Headers/Game.h"
 
 using std::cout;
-using std::endl;
-using std::string;
 
+const ConsoleColor Stage::BackgroundColor = ConsoleColor::Gray;
+const ConsoleColor Stage::ForegroundColor = ConsoleColor::Purple;
 const char Stage::BorderCharacter = '|';
 
 Stage::Stage()
 {
 	gridMap = NULL;
-	playStates = PlayStates::Playing;
 }
 
 Stage::~Stage()
@@ -57,7 +55,7 @@ void Stage::drawStageScreen()
 	cout << "CONSOLE SNAKE v1.0";
 
 	// SETS STAGE COLOR
-	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Purple);
+	Game::setTextColors(BackgroundColor, ForegroundColor);
 
 	// DRAWS THE STAGE BOUNDARIES
 	currentDrawPoint += {0, 1};

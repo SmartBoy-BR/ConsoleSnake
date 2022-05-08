@@ -51,19 +51,18 @@ bool Timer::run()
 
 			for (auto& tuple : callbackMethodsAndTimers)
 			{
-				if (std::get<4>(tuple) == true)
+				long& currentCounter = std::get<2>(tuple);
+				bool& markedForDeletion = std::get<4>(tuple);
+
+				if (markedForDeletion == true || --currentCounter > 0)
 					continue;
 
 				void* ownerObject = std::get<0>(tuple);
 				void (*methodPtr)(void*) = std::get<1>(tuple);
-				long& currentCounter = std::get<2>(tuple);
 				long& originalCounter = std::get<3>(tuple);
 
-				if (--currentCounter <= 0)
-				{
-					methodPtr(ownerObject);
-					currentCounter = originalCounter;
-				}
+				methodPtr(ownerObject);
+				currentCounter = originalCounter;
 			}
 		}
 

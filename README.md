@@ -1,2 +1,2 @@
 # ConsoleSnake
-A console snake game developed in C++
+A console snake game developed in C++ using OOP.

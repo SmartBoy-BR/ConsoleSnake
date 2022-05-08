@@ -6,7 +6,6 @@
 
 #include <conio.h>
 #include <iostream>
-#include <functional>
 #include <iomanip>
 #include "../Headers/TitleScreen.h"
 #include "../Headers/Stage.h"
@@ -14,7 +13,6 @@
 #include "../Headers/Game.h"
 
 using std::cout;
-using std::endl;
 using std::string;
 
 TitleScreen::TitleScreen()

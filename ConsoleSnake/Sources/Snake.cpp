@@ -6,7 +6,6 @@
 
 #include <conio.h>
 #include <iostream>
-#include <iomanip>
 #include "../Headers/Snake.h"
 #include "../Headers/Timer.h"
 #include "../Headers/Stage.h"
@@ -15,29 +14,24 @@
 #include "../Headers/Food.h"
 
 using std::cout;
-using std::endl;
 
-Snake::Snake(UI& ref)
-	: refUi(ref), MoveUp({ 0, -1 }), MoveDown({ 0, 1 }), MoveLeft({ -2, 0 }), MoveRight({ 2, 0 }), BodyInitialAmount(0)
+Snake::Snake(UI& ref) :
+	refUi(ref), MoveUp({ 0, -1 }), MoveDown({ 0, 1 }), MoveLeft({ -2, 0 }), MoveRight({ 2, 0 }), BodyInitialAmount(0),
+	BackgroundColor(Stage::BackgroundColor), HeadForegroundColor(ConsoleColor::LightAqua), CollisionForegroundColor(ConsoleColor::LightRed),
+	BodyForegroundColor(ConsoleColor::LightGreen), TailForegroundColor(ConsoleColor::LightYellow)
 {
 	isGameOver = false;
 }
 
-void Snake::setupMovementBoundaries(Point& refStartPosition, Point& refEndPosition)
+void Snake::setupMovementBoundaries()
 {
-	startMovePosition = Game::StartScreenPoint; //3,1
-	endMovePosition = Game::EndScreenPoint; //111,32
-
-	// ADJUSTS FOR KEEP MOVEMENT INSIDE GRID LIMITS
-	startMovePosition += {16, 8}; //19,9
-	endMovePosition -= {16, 7}; //95,25
-
-	refStartPosition = Point(startMovePosition);
-	refEndPosition = Point(endMovePosition);
+	// GET GRID MAP BOUNDARIES FOR MOVEMENT
+	startMovePosition = GridMap::getStartMovePosition();
+	endMovePosition = GridMap::getEndMovePosition();
 
 	createSnakeHead();
 
-	Timer::setTimerAndCallback(static_cast<short>(refUi.MinimumTimeSpeed / 3), this, &Snake::processesInputs_callBack);
+	Timer::setTimerAndCallback(static_cast<short>(refUi.getMinimumTimeSpeed() / 3), this, &Snake::processesInputs_callBack);
 	Timer::setTimerAndCallback(refUi.getNextSpeedPanelValue(), this, &Snake::movesTheSnake_callBack);
 }
 
@@ -55,8 +49,6 @@ bool Snake::processesGameplay()
 
 	return !isGameOver;
 }
-
-Point Snake::getSnakeHeadPosition() { return head.getPosition(); }
 
 int Snake::processesInputs()
 {
@@ -109,22 +101,12 @@ int Snake::processesInputs()
 void Snake::createSnakeHead()
 {
 	// RANDOMLY POSITIONS THE "HEAD" ON THE MAP
-	const short xCoordLimit = static_cast<short>((endMovePosition.X() - startMovePosition.X()) * 0.5) + 1;
-	const short yCoordLimit = static_cast<short>(endMovePosition.Y() - startMovePosition.Y() + 1);
-	
-	short randomXcoord, randomYcoord;
-
-	randomXcoord = (rand() % xCoordLimit); // Seed has already been generated with srand in the Game constructor.
-	randomYcoord = (rand() % yCoordLimit);
-
-	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightAqua);
-	head = BodyPiece(startMovePosition + Point(randomXcoord * 2, randomYcoord), '@');
+	Game::setTextColors(BackgroundColor, HeadForegroundColor);
+	head = BodyPiece(GridMap::getRandomPosition(), '@');
 	head.printBodyPiece();
 
 	// DETERMINES THE DIRECTION OF THE SNAKE'S MOVEMENT
-	Point centerPosition = {
-		static_cast<int>((startMovePosition.X() + endMovePosition.X()) * 0.5),
-		static_cast<int>((startMovePosition.Y() + endMovePosition.Y()) * 0.5) };
+	Point centerPosition = GridMap::getCenterMovePosition();
 
 	movementDirection = centerPosition - head.getPosition();
 
@@ -192,7 +174,7 @@ void Snake::createSnakeBody()
 	};
 
 	// POSITIONS THE "BODY" FOLLOWING THE OPPOSITE MOVEMENT DIRECTION
-	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightGreen);
+	Game::setTextColors(BackgroundColor, BodyForegroundColor);
 	for (short i = 0; i < BodyInitialAmount; i++)
 	{
 		// NOTE: Needs improvements. Does not check very specific cases.
@@ -213,7 +195,7 @@ void Snake::createSnakeBody()
 		lastOppositeDirection += oppositeMovementDirection;
 	} while (checkForOppositeCollision());
 
-	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightYellow);
+	Game::setTextColors(BackgroundColor, TailForegroundColor);
 	tail = BodyPiece(lastOppositeDirection, '$');
 	tail.printBodyPiece();
 }
@@ -298,25 +280,25 @@ void Snake::printTheBodyWhenMoving(const Point& refLastPosition, const bool& ref
 {
 	if (!isGameOver)
 	{
-		Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightAqua);
+		Game::setTextColors(BackgroundColor, HeadForegroundColor);
 		head.printBodyPiece();
 	}
 
 	if (!body.empty())
 	{
-		Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightGreen);
+		Game::setTextColors(BackgroundColor, BodyForegroundColor);
 		body.front().printBodyPiece();
 
 		if (refGotFoodFlag)
 		{
-			Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Yellow);
+			Game::setTextColors(BackgroundColor, Food::ForegroundColor);
 			body.back().printBodyPiece();
 		}
 	}
 
 	if (!refGotFoodFlag)
 	{
-		Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightYellow);
+		Game::setTextColors(BackgroundColor, TailForegroundColor);
 		tail.printBodyPiece();
 
 		if (head.getPosition() != refLastPosition)
@@ -331,9 +313,9 @@ void Snake::printTheBodyWhenMoving(const Point& refLastPosition, const bool& ref
 		Timer::markTimerForDeletion(this, &Snake::movesTheSnake_callBack);
 
 		if (refGridMapCollisionFlag)
-			Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightRed);
+			Game::setTextColors(GridMap::BorderColor, CollisionForegroundColor);
 		else if (refBodyCollisionFlag)
-			Game::setTextColors(ConsoleColor::Gray, ConsoleColor::LightRed);
+			Game::setTextColors(BackgroundColor, CollisionForegroundColor);
 
 		head.printBodyPiece();
 	}

@@ -10,18 +10,19 @@
 #include "../Headers/UI.h"
 #include "../Headers/GridMap.h"
 
-enum class PlayStates { Playing, GameOver, BackToStart };
+enum class ConsoleColor;
 
 class Stage
 {
 	private:
-		UI				ui;
-		GridMap*		gridMap;
-		PlayStates		playStates;
+		UI			ui;
+		GridMap*	gridMap;
 
 		void drawStageScreen();
 
 	public:
+		static const ConsoleColor BackgroundColor;
+		static const ConsoleColor ForegroundColor;
 		static const char BorderCharacter;
 
 		Stage();

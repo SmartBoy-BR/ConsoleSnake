@@ -11,6 +11,8 @@
 #include "../Headers/BodyPiece.h"
 #include "../Headers/UI.h"
 
+enum class ConsoleColor;
+
 using std::list;
 
 class Snake
@@ -22,6 +24,11 @@ class Snake
 		const Point				MoveLeft;
 		const Point				MoveRight;
 		const unsigned char		BodyInitialAmount;
+		const ConsoleColor		BackgroundColor;
+		const ConsoleColor		HeadForegroundColor;
+		const ConsoleColor		CollisionForegroundColor;
+		const ConsoleColor		BodyForegroundColor;
+		const ConsoleColor		TailForegroundColor;
 
 		Point				startMovePosition;
 		Point				endMovePosition;
@@ -44,7 +51,6 @@ class Snake
 
 	public:
 		Snake(UI& ref);
-		void setupMovementBoundaries(Point& refStartPosition, Point& refEndPosition);
+		void setupMovementBoundaries();
 		bool processesGameplay();
-		Point getSnakeHeadPosition();
 };

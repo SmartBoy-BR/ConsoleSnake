@@ -13,15 +13,17 @@
 #include "../Headers/Game.h"
 
 using std::cout;
-using std::endl;
-using std::string;
 
-UI::UI()
-	: PointsToIncreaseSpeed(300), StartTimeSpeed(260), MinimumTimeSpeed(38)
+const vector<ushort> UI::SnakeSpeedTimes = { 38, 39, 40, 43, 46, 51, 56, 63, 70, 80, 90, 110, 130, 160, 190, 225, 260 };
+
+UI::UI() :
+	BackgroundColor(Stage::ForegroundColor), ScoreForegroundColor(ConsoleColor::LightGreen),
+	HiScoreForegroundColor(ConsoleColor::LightAqua), SpeedForegroundColor(ConsoleColor::Yellow),
+	PointsToIncreaseSpeed(300)
 {
-	showScorePoints = false;
-	showHiScorePoints = false;
-	showSpeedValue = false;
+	showScorePoints = true;
+	showHiScorePoints = true;
+	showSpeedValue = true;
 
 	// Positions are changed inside "drawUI"
 	scorePanelPosition = { 9, 3 }; 
@@ -29,10 +31,11 @@ UI::UI()
 	snakeSpeedPanelPosition = { 56, 3 };
 
 	scorePanelPoints = 0;
-	pointsToAdd = 0;
+	nextScoreValue = 0;
 	hiScorePanelPoints = Game::lastHiScorePoints;
-	snakeSpeedPanelValue = StartTimeSpeed;
-	nextSnakeSpeedValue = snakeSpeedPanelValue;
+	speedTimeIndex = static_cast<ushort>(SnakeSpeedTimes.size()) - 1;
+	nextSnakeSpeedTime = SnakeSpeedTimes[speedTimeIndex];
+	snakeSpeedPanelValue = nextSnakeSpeedTime;
 }
 
 void UI::setupUI()
@@ -40,26 +43,26 @@ void UI::setupUI()
 	drawUI();
 }
 
-void UI::addScorePoints(unsigned short morePoints)
+void UI::addScorePoints(ushort pointsToAdd)
 {
 	deleteUItimers();
 
-	pointsToAdd += morePoints;
+	nextScoreValue += pointsToAdd;
 
 	blinkMethods.push_back(&UI::blinkScore_callBack);
 
-	if (hiScorePanelPoints < scorePanelPoints + pointsToAdd)
+	if (hiScorePanelPoints < nextScoreValue)
 	{
 		blinkMethods.push_back(&UI::blinkHiScore_callBack);
-		Game::lastHiScorePoints = scorePanelPoints + pointsToAdd;
+		Game::lastHiScorePoints = nextScoreValue;
 	}
 
-	if (nextSnakeSpeedValue > MinimumTimeSpeed &&
-		((scorePanelPoints + pointsToAdd) % PointsToIncreaseSpeed) == 0)
+	if (nextSnakeSpeedTime > SnakeSpeedTimes[0] &&
+		(nextScoreValue % PointsToIncreaseSpeed) == 0)
 	{
-		setNextSpeedPanelValue();
+		nextSnakeSpeedTime = SnakeSpeedTimes[--speedTimeIndex];
 
-		if (nextSnakeSpeedValue == MinimumTimeSpeed)
+		if (nextSnakeSpeedTime == SnakeSpeedTimes[0])
 			Timer::setTimerAndCallback(200, this, &UI::blinkSpeedValue_callBack);
 		else
 			blinkMethods.push_back(&UI::blinkSpeedValue_callBack);
@@ -71,10 +74,8 @@ void UI::addScorePoints(unsigned short morePoints)
 		Timer::setTimerAndCallback(100, this, method);
 }
 
-unsigned short UI::getNextSpeedPanelValue()
-{
-	return nextSnakeSpeedValue;
-}
+ushort UI::getNextSpeedPanelValue() { return nextSnakeSpeedTime; }
+ushort UI::getMinimumTimeSpeed() { return SnakeSpeedTimes[0]; }
 
 void UI::deleteUItimers()
 {
@@ -86,31 +87,7 @@ void UI::deleteUItimers()
 
 	blinkMethods.clear();
 
-	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightGreen);
-	writeScore();
-	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightAqua);
-	writeHiScore();
-	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Yellow);
-	writeSpeedValue();
-}
-
-void UI::setNextSpeedPanelValue()
-{
-	if (nextSnakeSpeedValue <= MinimumTimeSpeed)
-	{
-		nextSnakeSpeedValue = MinimumTimeSpeed;
-		return;
-	}
-
-	// Some logic to change and limit the speed.
-	if (nextSnakeSpeedValue > StartTimeSpeed - 35 - 35) nextSnakeSpeedValue = nextSnakeSpeedValue - 35; //> 190
-	else if (nextSnakeSpeedValue > StartTimeSpeed - 70 - 30 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 30; //> 130
-	else if (nextSnakeSpeedValue > StartTimeSpeed - 130 - 20 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 20; //> 90
-	else if (nextSnakeSpeedValue > StartTimeSpeed - 170 - 10 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 10; //> 70
-	else if (nextSnakeSpeedValue > StartTimeSpeed - 190 - 7 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 7; //> 56
-	else if (nextSnakeSpeedValue > StartTimeSpeed - 204 - 5 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 5; //> 46
-	else if (nextSnakeSpeedValue > StartTimeSpeed - 214 - 3 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 3; //> 40
-	else if (nextSnakeSpeedValue > StartTimeSpeed - 220 - 1 * 2) nextSnakeSpeedValue = nextSnakeSpeedValue - 1; //> 38
+	writeAllPanelValues();
 }
 
 void UI::drawUI()
@@ -124,7 +101,7 @@ void UI::drawUI()
 	endDrawPoint -= {6, 27}; //105,5
 
 	// SETS UI MAIN COLOR
-	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::BrightWhite);
+	Game::setTextColors(BackgroundColor, ConsoleColor::BrightWhite);
 
 	// DRAW THE PANEL BORDERS
 	Game::setCursorPosition(hiScorePanelPosition.X(), hiScorePanelPosition.Y() + 1); //32,4
@@ -162,80 +139,51 @@ void UI::drawUI()
 	scorePanelPosition += { 10, 0 };
 	hiScorePanelPosition += { 11, 0 };
 	snakeSpeedPanelPosition += { 25, 0 };
-	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightGreen);
-	writeScore();
+	Game::setTextColors(BackgroundColor, ScoreForegroundColor);
+	writePanelValue(scorePanelPosition, 7, scorePanelPoints);
 	cout << " pts  ";
-	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightAqua);
-	writeHiScore();
+	Game::setTextColors(BackgroundColor, HiScoreForegroundColor);
+	writePanelValue(hiScorePanelPosition, 7, hiScorePanelPoints);
 	cout << " pts  ";
-	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Yellow);
-	writeSpeedValue();
+	Game::setTextColors(BackgroundColor, SpeedForegroundColor);
+	writePanelValue(snakeSpeedPanelPosition, 3, snakeSpeedPanelValue);
 	cout << " milissegundos       ";
 }
 
-void UI::blinkScore()
+void UI::blinkPanelValue(bool& showPanelValue, const ConsoleColor& valueForegroundColor)
 {
-	showScorePoints = !showScorePoints;
-
-	if (showScorePoints)
-		Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightGreen);
+	showPanelValue = !showPanelValue;
+	
+	if (showPanelValue)
+		Game::setTextColors(BackgroundColor, valueForegroundColor);
 	else
-		Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Purple);
-
-	writeScore();
+		Game::setTextColors(BackgroundColor, BackgroundColor);
 }
 
-void UI::blinkHiScore()
+void UI::writePanelValue(const Point& panelPosition, const uchar setW, const ushort& panelValue)
 {
-	showHiScorePoints = !showHiScorePoints;
-
-	if (showHiScorePoints)
-		Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightAqua);
-	else
-		Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Purple);
-
-	writeHiScore();
+	Game::setCursorPosition(panelPosition);
+	cout << std::setfill('0') << std::setw(setW) << panelValue;
 }
 
-void UI::blinkSpeedValue()
+void UI::writeAllPanelValues()
 {
-	showSpeedValue = !showSpeedValue;
-
-	if (showSpeedValue)
-		Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Yellow);
-	else
-		Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Purple);
-
-	writeSpeedValue();
-}
-
-void UI::writeScore()
-{
-	Game::setCursorPosition(scorePanelPosition); //19,4
-	cout << std::setfill('0') << std::setw(7) << scorePanelPoints;
-}
-
-void UI::writeHiScore()
-{
-	Game::setCursorPosition(hiScorePanelPosition); //43,4
-	cout << std::setfill('0') << std::setw(7) << hiScorePanelPoints;
-}
-
-void UI::writeSpeedValue()
-{
-	Game::setCursorPosition(snakeSpeedPanelPosition); //86,4
-	cout << std::setfill('0') << std::setw(3) << snakeSpeedPanelValue;
+	Game::setTextColors(BackgroundColor, ScoreForegroundColor);
+	writePanelValue(scorePanelPosition, 7, scorePanelPoints);
+	Game::setTextColors(BackgroundColor, HiScoreForegroundColor);
+	writePanelValue(hiScorePanelPosition, 7, hiScorePanelPoints);
+	Game::setTextColors(BackgroundColor, SpeedForegroundColor);
+	writePanelValue(snakeSpeedPanelPosition, 3, snakeSpeedPanelValue);
 }
 
 void UI::prepareToStopBlinking()
 {
-	scorePanelPoints += pointsToAdd;
-	pointsToAdd = 0;
+	scorePanelPoints = nextScoreValue;
 
 	if (hiScorePanelPoints < scorePanelPoints)
 		hiScorePanelPoints = scorePanelPoints;
 
-	snakeSpeedPanelValue = nextSnakeSpeedValue;
+	snakeSpeedPanelValue = nextSnakeSpeedTime;
 	
 	Timer::setTimerAndCallback(1000, this, &UI::stopBlinking_callBack);
 	
@@ -252,32 +200,33 @@ void UI::stopBlinking()
 	
 	Timer::markTimerForDeletion(this, &UI::stopBlinking_callBack);
 
-	showScorePoints = false;
-	showHiScorePoints = false;
-	showSpeedValue = false;
-	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightGreen);
-	writeScore();
-	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::LightAqua);
-	writeHiScore();
-	Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Yellow);
-	writeSpeedValue();
+	showScorePoints = true;
+	showHiScorePoints = true;
+	showSpeedValue = true;
+	writeAllPanelValues();
 
 	blinkMethods.clear();
 }
 
 void UI::blinkScore_callBack(void* ownerObject)
 {
-	reinterpret_cast<UI*>(ownerObject)->blinkScore();
+	UI* ptrUi = reinterpret_cast<UI*>(ownerObject);
+	ptrUi->blinkPanelValue(ptrUi->showScorePoints, ptrUi->ScoreForegroundColor);
+	ptrUi->writePanelValue(ptrUi->scorePanelPosition, 7, ptrUi->scorePanelPoints);
 }
 
 void UI::blinkHiScore_callBack(void* ownerObject)
 {
-	reinterpret_cast<UI*>(ownerObject)->blinkHiScore();
+	UI* ptrUi = reinterpret_cast<UI*>(ownerObject);
+	ptrUi->blinkPanelValue(ptrUi->showHiScorePoints, ptrUi->HiScoreForegroundColor);
+	ptrUi->writePanelValue(ptrUi->hiScorePanelPosition, 7, ptrUi->hiScorePanelPoints);
 }
 
 void UI::blinkSpeedValue_callBack(void* ownerObject)
 {
-	reinterpret_cast<UI*>(ownerObject)->blinkSpeedValue();
+	UI* ptrUi = reinterpret_cast<UI*>(ownerObject);
+	ptrUi->blinkPanelValue(ptrUi->showSpeedValue, ptrUi->SpeedForegroundColor);
+	ptrUi->writePanelValue(ptrUi->snakeSpeedPanelPosition, 3, ptrUi->snakeSpeedPanelValue);
 }
 
 void UI::prepareToStopBlinking_callBack(void* ownerObject)

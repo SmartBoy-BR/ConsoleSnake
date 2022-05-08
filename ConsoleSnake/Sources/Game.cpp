@@ -5,14 +5,11 @@
  */
 
 #include <iostream>
-#include <iomanip>
-#include <string>
 #include "../Headers/Game.h"
 #include "../Headers/Timer.h"
 
 using std::cout;
 using std::endl;
-using std::string;
 
 HANDLE Game::handle;
 COORD Game::cursorCoord;
@@ -187,49 +184,4 @@ void Game::prepareToCloseWindow()
 void Game::setConsoleColorsAttribute(short hexaColorsCode)
 {
     SetConsoleTextAttribute(handle, hexaColorsCode);
-}
-
-void Game::testColors()
-{
-    if (handle == NULL)
-        return;
-    
-    //std::cout << "┌─┐ └─┘ │ ™ ® © ¤ ▓ ◉    !" << std::endl << std::endl;
-
-    //for (short i = 0; i < 5; i++) //2,3,4,6,8,16,20,30,34,56,57,60,70,80,
-    //{
-    //    string backColorCmd = "Color ";
-    //    backColorCmd.append(std::to_string(i));
-    //    system(backColorCmd.c_str());
-
-    //    setCursorPosition(30, 3);
-    //    cout << "COR " << i << "\t";
-    //    cout << "COR " << i << "\t";
-    //    cout << "COR " << i << "\t";
-    //    cout << "COR " << i << "\t";
-    //    cout << "COR " << i << "\t";
-    //    cout << "COR " << i;
-    //    Sleep(500);
-    //}
-    system("Color 7");
-    //cout << endl;
-    
-    short combinedColor = 0x00;
-
-    for (short i = 0; i < 16; i++)
-    {
-        combinedColor = i;
-        combinedColor <<= 4;
-
-        for (short j = 0; j < 16; j++)
-        {
-            combinedColor &= 0xF0;
-            combinedColor |= j;
-
-            //SetConsoleTextAttribute(handle, combinedColor);
-            //cout << "Cor " << combinedColor << endl;
-            setTextColors(static_cast<ConsoleColor>(i), static_cast<ConsoleColor>(j));
-            cout << "Cor " << ((i << 4) | j) << endl;
-        }
-    }
 }

@@ -9,25 +9,35 @@
 #include <vector>
 #include "../Headers/Point.h"
 
+enum class ConsoleColor;
+
 using std::vector;
+
+typedef unsigned short ushort;
+typedef unsigned char uchar;
 
 class UI
 {
 	private:
-		const short				PointsToIncreaseSpeed;
-		const short				StartTimeSpeed;
-		bool					showScorePoints;
-		bool					showHiScorePoints;
-		bool					showSpeedValue;
-		Point					scorePanelPosition;
-		Point					hiScorePanelPosition;
-		Point					snakeSpeedPanelPosition;
-		unsigned short			scorePanelPoints;
-		unsigned short			pointsToAdd;
-		unsigned short			hiScorePanelPoints;
-		unsigned short			snakeSpeedPanelValue;
-		unsigned short			nextSnakeSpeedValue;
-		vector<void (*)(void*)>	blinkMethods;
+		static const vector<ushort>	SnakeSpeedTimes;
+		const ConsoleColor			BackgroundColor;
+		const ConsoleColor			ScoreForegroundColor;
+		const ConsoleColor			HiScoreForegroundColor;
+		const ConsoleColor			SpeedForegroundColor;
+		const short					PointsToIncreaseSpeed;
+		bool						showScorePoints;
+		bool						showHiScorePoints;
+		bool						showSpeedValue;
+		Point						scorePanelPosition;
+		Point						hiScorePanelPosition;
+		Point						snakeSpeedPanelPosition;
+		ushort						scorePanelPoints;
+		ushort						nextScoreValue;
+		ushort						hiScorePanelPoints;
+		ushort						snakeSpeedPanelValue;
+		ushort						speedTimeIndex;
+		ushort						nextSnakeSpeedTime;
+		vector<void (*)(void*)>		blinkMethods;
 
 		static void blinkScore_callBack(void* ownerObject);
 		static void blinkHiScore_callBack(void* ownerObject);
@@ -35,23 +45,18 @@ class UI
 		static void prepareToStopBlinking_callBack(void* ownerObject);
 		static void stopBlinking_callBack(void* ownerObject);
 
-		void setNextSpeedPanelValue();
 		void drawUI();
-		void blinkScore();
-		void blinkHiScore();
-		void blinkSpeedValue();
-		void writeScore();
-		void writeHiScore();
-		void writeSpeedValue();
+		void blinkPanelValue(bool& showPanelValue, const ConsoleColor& valueForegroundColor);
+		void writePanelValue(const Point& panelPosition, const uchar setW, const ushort& panelValue);
+		void writeAllPanelValues();
 		void prepareToStopBlinking();
 		void stopBlinking();
 
 	public:
-		const short	MinimumTimeSpeed;
-
 		UI();
 		void setupUI();
-		void addScorePoints(unsigned short morePoints);
-		unsigned short getNextSpeedPanelValue();
+		void addScorePoints(ushort pointsToAdd);
+		ushort getNextSpeedPanelValue();
+		ushort getMinimumTimeSpeed();
 		void deleteUItimers();
 };

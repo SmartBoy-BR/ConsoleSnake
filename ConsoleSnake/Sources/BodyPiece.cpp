@@ -5,13 +5,10 @@
  */
 
 #include <iostream>
-//#include <iomanip>
 #include "../Headers/BodyPiece.h"
 #include "../Headers/Game.h"
 
 using std::cout;
-//using std::endl;
-//using std::string;
 
 BodyPiece::BodyPiece()
 {

@@ -8,14 +8,17 @@
 #include "../Headers/Food.h"
 #include "../Headers/Timer.h"
 #include "../Headers/Game.h"
+#include "../Headers/GridMap.h"
+#include "../Headers/Stage.h"
 
 using std::cout;
-using std::endl;
 
+const ConsoleColor Food::BackgroundColor = Stage::BackgroundColor;
+const ConsoleColor Food::ForegroundColor = ConsoleColor::Yellow;
+const unsigned char Food::TriesAmount = 5;
 std::vector<Food*> Food::foodsOnGridMap;
 Point Food::startMovePosition;
 Point Food::endMovePosition;
-//Point Food::(Snake::* snakeHeadPosMethodPtr)();
 const char Food::FoodCharacter = 'o';
 const short Food::PointsPerFood = 100;
 
@@ -25,16 +28,16 @@ Food::Food(Point& spawnPos, unsigned char lifeTimeInSecs)
 	lifeTimeInSeconds = lifeTimeInSecs;
 	showFoodOnGridMap = true;
 
-	Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Yellow);
+	Game::setTextColors(BackgroundColor, ForegroundColor);
 	writeFoodCharacter();
 
 	Timer::setTimerAndCallback(1000, this, &decreaseLifeTime_callBack);
 }
 
-void Food::startFoodSpawner(Point& startPos, Point& endPos)
+void Food::startFoodSpawner()
 {
-	startMovePosition = startPos;
-	endMovePosition = endPos;
+	startMovePosition = GridMap::getStartMovePosition();
+	endMovePosition = GridMap::getEndMovePosition();
 	Timer::setTimerAndCallback(((rand() % 3) + 2) * 1000, // 0 to 2 plus 2 => (2..4) * 1000
 		NULL, &runFoodSpawner);
 }
@@ -54,7 +57,7 @@ void Food::deleteFoodOnGridMap(Point gridPosition)
 			Timer::markTimerForDeletion(foodPtr, &blinkFoodOnGridMap_callBack);
 			Timer::markTimerForDeletion(foodPtr, &decreaseLifeTime_callBack);
 
-			Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Yellow);
+			Game::setTextColors(BackgroundColor, ForegroundColor);
 			Game::setCursorPosition(foodPtr->GridPosition);
 			cout << ' ';
 
@@ -89,9 +92,9 @@ void Food::blinkFoodOnGridMap()
 	showFoodOnGridMap = !showFoodOnGridMap;
 
 	if (showFoodOnGridMap)
-		Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Yellow);
+		Game::setTextColors(BackgroundColor, ForegroundColor);
 	else
-		Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Gray);
+		Game::setTextColors(BackgroundColor, BackgroundColor);
 
 	writeFoodCharacter();
 }
@@ -99,24 +102,23 @@ void Food::blinkFoodOnGridMap()
 void Food::runFoodSpawner(void* nullObj)
 {
 	Point newFoodPosition;
+	unsigned char tries = TriesAmount;
 	
 	do
 	{
-		newFoodPosition = startMovePosition;
+		if (tries-- == 0)
+		{
+			Timer::setTimerAndCallback(((rand() % 3) + 2) * 1000, // 0 to 2 plus 2 => (2..4) * 1000
+				NULL, &runFoodSpawner);
+			return;
+		}
 
-		const short xCoordLimit = static_cast<short>((endMovePosition.X() - startMovePosition.X()) * 0.5) + 1;
-		const short yCoordLimit = static_cast<short>(endMovePosition.Y() - startMovePosition.Y() + 1);
-
-		short randomXcoord, randomYcoord;
-
-		randomXcoord = (rand() % xCoordLimit);
-		randomYcoord = (rand() % yCoordLimit);
-
-		newFoodPosition += { randomXcoord * 2, randomYcoord };
+		newFoodPosition = GridMap::getRandomPosition();
 	
 	} while (Game::getCursorPositionData(newFoodPosition) != ' ');
 
 	foodsOnGridMap.push_back(new Food(newFoodPosition, (rand() % 6) + 7)); // 0 to 5 plus 7 => (7..12)
+
 	Timer::setTimerAndCallback(((rand() % 7) + 2) * 1000, // 0 to 6 plus 2 => (2..8) * 1000
 		NULL, &runFoodSpawner);
 }

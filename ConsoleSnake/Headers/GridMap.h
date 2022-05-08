@@ -10,19 +10,23 @@
 #include "../Headers/Point.h"
 #include "../Headers/Food.h"
 
+enum class ConsoleColor;
+
 class GridMap
 {
 	private:
-		Snake*			snake;
-		static Point	startMovePosition;
-		static Point	endMovePosition;
-		static Point	upperPortalPosition;
-		static Point	lowerPortalPosition;
+		Snake*				snake;
+		static Point		startMovePosition;
+		static Point		endMovePosition;
+		static Point		upperPortalPosition;
+		static Point		lowerPortalPosition;
 
 		void drawPortals();
 		void showGameOver();
 
 	public:
+		static const ConsoleColor	BorderColor;
+
 		GridMap(UI& ref);
 		~GridMap();
 		void drawGrid();
@@ -32,4 +36,6 @@ class GridMap
 		static Point getLowerPortalPosition();
 		static Point getStartMovePosition();
 		static Point getEndMovePosition();
+		static Point getCenterMovePosition();
+		static Point getRandomPosition();
 };

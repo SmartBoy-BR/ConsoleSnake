@@ -2,6 +2,8 @@
  * CREATED DATE:    2022-Apr-21
  *
  * FUNCTION: Source file for drawing the boundaries of the arena and gameplay space.
+ * NOTE:The "run" method can be changed to use a finite state machine.
+ *		The "showGameOver" method can be changed to use counter timers instead of "Sleep".
  */
 
 #include <iostream>
@@ -13,7 +15,6 @@
 #include "../Headers/Food.h"
 
 using std::cout;
-using std::endl;
 using std::string;
 using std::setfill;
 
@@ -21,8 +22,7 @@ Point GridMap::startMovePosition;
 Point GridMap::endMovePosition;
 Point GridMap::upperPortalPosition;
 Point GridMap::lowerPortalPosition;
-
-const int bordCol = 5; // ToDo Excluir após substituição
+const ConsoleColor GridMap::BorderColor = ConsoleColor::Purple;
 
 GridMap::GridMap(UI& ref)
 {
@@ -32,17 +32,19 @@ GridMap::GridMap(UI& ref)
 GridMap::~GridMap()
 {
 	delete snake;
-	//delete startMovePosition;
-	//delete endMovePosition;
 	snake = NULL;
-	//startMovePosition = NULL;
-	//endMovePosition = NULL;
 }
 
 void GridMap::drawGrid()
 {
 	Point currentDrawPoint(Game::StartScreenPoint); //3,1
 	Point endDrawPoint(Game::EndScreenPoint); //111,32
+
+	// ADJUSTS FOR KEEP MOVEMENT INSIDE GRID LIMITS
+	startMovePosition = currentDrawPoint;
+	startMovePosition += {16, 8}; //19,9
+	endMovePosition = endDrawPoint;
+	endMovePosition -= {16, 7}; //95,25
 	
 	// ADJUSTS FOR THE GRID LIMITS
 	currentDrawPoint += {13, 7}; //16,8
@@ -54,8 +56,7 @@ void GridMap::drawGrid()
 	lowerPortalPosition -= {6, 0};
 
 	// SETS GRIDMAP COLOR
-	ConsoleColor borderColor = static_cast<ConsoleColor>(bordCol);
-	Game::setTextColors(borderColor, borderColor);
+	Game::setTextColors(BorderColor, BorderColor);
 
 	// DRAWS THE ARENA EDGES
 	Game::setCursorPosition(currentDrawPoint); // 16,8
@@ -86,9 +87,9 @@ int GridMap::run()
 
 	if (snake != NULL)
 	{
-		snake->setupMovementBoundaries(startMovePosition, endMovePosition);
+		snake->setupMovementBoundaries();
 
-		Food::startFoodSpawner(startMovePosition, endMovePosition);
+		Food::startFoodSpawner();
 
 		while (keepPlaying)
 		{
@@ -117,6 +118,26 @@ Point GridMap::getLowerPortalPosition() { return lowerPortalPosition; }
 Point GridMap::getStartMovePosition() { return startMovePosition; }
 Point GridMap::getEndMovePosition() { return endMovePosition; }
 
+Point GridMap::getCenterMovePosition()
+{
+	return Point{
+		static_cast<int>((startMovePosition.X() + endMovePosition.X()) * 0.5),
+		static_cast<int>((startMovePosition.Y() + endMovePosition.Y()) * 0.5) };
+}
+
+Point GridMap::getRandomPosition()
+{
+	const short xCoordLimit = static_cast<short>((endMovePosition.X() - startMovePosition.X()) * 0.5) + 1;
+	const short yCoordLimit = static_cast<short>(endMovePosition.Y() - startMovePosition.Y() + 1);
+
+	short randomXcoord, randomYcoord;
+
+	randomXcoord = (rand() % xCoordLimit); // Seed has already been generated with srand in the Game constructor.
+	randomYcoord = (rand() % yCoordLimit);
+
+	return Point(startMovePosition + Point(randomXcoord * 2, randomYcoord));
+}
+
 void GridMap::drawPortals()
 {
 	// RANDOMLY POSITIONS THE PORTALS
@@ -128,14 +149,14 @@ void GridMap::drawPortals()
 	randomXcoord = (rand() % xCoordLimit);
 	lowerPortalPosition -= {randomXcoord * 2, 0};
 
-	auto printHalfPortal = [](const Point& position) // Lambda expression to draw half portal.
+	auto printHalfPortal = [this](const Point& position) // Lambda expression to draw half portal.
 	{
 		Game::setCursorPosition(position);
-		Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Purple);
+		Game::setTextColors(BorderColor, BorderColor);
 		cout << std::setw(2) << Stage::BorderCharacter; // "setfill" is BorderCharacter.
-		Game::setTextColors(ConsoleColor::Gray, ConsoleColor::Purple);
+		Game::setTextColors(Stage::BackgroundColor, BorderColor);
 		cout << "   ";
-		Game::setTextColors(ConsoleColor::Purple, ConsoleColor::Purple);
+		Game::setTextColors(BorderColor, BorderColor);
 		cout << std::setw(2) << Stage::BorderCharacter;
 	};
 
@@ -158,9 +179,7 @@ void GridMap::showGameOver()
 	short setW = static_cast<short>(gameOver.length() - 2);
 	short halfGameOVerLength = static_cast<short>(gameOver.length() * 0.5);
 
-	Point centerPosition = {
-		static_cast<int>((startMovePosition.X() + endMovePosition.X()) * 0.5),
-		static_cast<int>((startMovePosition.Y() + endMovePosition.Y()) * 0.5) };
+	Point centerPosition = getCenterMovePosition();
 	
 	Point upperPosition = centerPosition - Point{ halfGameOVerLength, 1 };
 

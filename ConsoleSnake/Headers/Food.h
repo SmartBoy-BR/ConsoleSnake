@@ -9,7 +9,7 @@
 #include <vector>
 #include "../Headers/Point.h"
 
-class Snake;
+enum class ConsoleColor;
 
 class Food
 {
@@ -17,6 +17,8 @@ class Food
 		const Point					GridPosition;
 		const unsigned char			RemainingTimeToStartBlinking;
 		const unsigned char			MinSqrDistanceToSnakeHead;
+		static const ConsoleColor	BackgroundColor;
+		static const unsigned char	TriesAmount;
 		unsigned char				lifeTimeInSeconds;
 		bool						showFoodOnGridMap;
 		static std::vector<Food*>	foodsOnGridMap;
@@ -32,12 +34,13 @@ class Food
 		void blinkFoodOnGridMap();
 
 	public:
+		static const ConsoleColor ForegroundColor;
 		static const char	FoodCharacter;
 		static const short	PointsPerFood;
 
 		Food(Point& spawnPos, unsigned char lifeTimeInSecs);
 
-		static void startFoodSpawner(Point& startPos, Point& endPos);
+		static void startFoodSpawner();
 		static void stopFoodSpawner();
 		static void deleteFoodOnGridMap(Point gridPosition);
 

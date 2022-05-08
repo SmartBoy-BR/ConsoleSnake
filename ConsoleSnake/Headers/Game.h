@@ -63,5 +63,4 @@ class Game
         static char getCursorPositionData(const Point& cursorCoordinate);
         static void setTextColors(ConsoleColor backgroundColor, ConsoleColor foregroundColor);
         static void backToTitleScreenColors();
-        void testColors();
 };
